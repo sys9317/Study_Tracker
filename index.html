@@ -1,0 +1,3402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Study Tracker</title>
+<style>html,body{margin:0;padding:0;}*{box-sizing:border-box;}
+#loading{font-family:sans-serif;padding:40px;color:#555;font-size:15px;line-height:1.6;}</style>
+</head>
+<body>
+<div id="root"><div id="loading">Loading study tracker… 잠시만 기다려 주세요.<br>(If this stays, React could not load from the internet.)</div></div>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script>
+(function(){
+  function start(){
+    if(!window.React || !window.ReactDOM){
+      document.getElementById("loading").innerHTML = "React\uB97C \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4. \uC0C8\uB85C\uACE0\uCE68 \uD574\uBCF4\uC138\uC694.<br>Could not load React \u2014 check internet, then refresh.";
+      return;
+    }
+    var useState = React.useState, useEffect = React.useEffect;
+    try {
+// ════════════════════════════════════════════════════════════
+// v8 — Phase 2 rebuilt book/drill-centered (McKinney + SQLBolt/pgexercises/DataLemur); 41 days
+// High-contrast readable redesign, all phases complete, KO/EN
+// ════════════════════════════════════════════════════════════
+
+const PHASES = [{
+  id: "p0",
+  name: "Phase 0",
+  title: "기초 복습 · Foundations",
+  weeks: "Week 1–3",
+  color: "#0d5c54",
+  bg: "#d4ede8",
+  goalKo: "면접·실무의 토대인 미시/거시 직관과 통계 추론을 빠르게 재정비. 이미 배운 것이라 '복습 속도'로.",
+  goalEn: "Quickly re-cement micro/macro intuition and statistical inference — the foundation for interviews and the job. Move at review speed.",
+  deliverable: "개념 치트시트 + 통계 추론 문제 세트 · Concept cheat-sheet + inference problem set"
+}, {
+  id: "p1",
+  name: "Phase 1",
+  title: "R + Econometrics Core",
+  weeks: "Week 4–7",
+  color: "#b03608",
+  bg: "#ffe6d5",
+  goalKo: "R/tidyverse를 검색 없이 칠 수 있는 수준으로 올리고, OLS·FE·DiD·IV/RDD의 인과 직관을 재정비. 좋은 예제 Quarto repo를 보고, 내 노트와 리포트를 그 구조에 맞춰 재현한다.",
+  goalEn: "Get to fluent R/tidyverse, then refresh causal econometrics intuition around OLS, FE, DiD, and IV/RDD. Study a clean example Quarto repo and reproduce its structure in your own notes and reports.",
+  deliverable: "ds-curriculum-phase1 repo: Quarto EDA + 회귀/식별 리포트 + 사이트 뼈대 + example repo notes"
+}, {
+  id: "p2",
+  name: "Phase 2",
+  title: "Python + SQL · Data Work",
+  weeks: "Week 8–14",
+  color: "#1546c4",
+  bg: "#dce6ff",
+  goalKo: "책 한 권을 끝까지 따라가며 손으로 친다. Python은 McKinney의 무료 책으로, SQL은 SQLBolt로 읽고 pgexercises·DataLemur로 매일 푼다. '읽고→따라치고→드릴→커밋' 루프로 Python·SQL·데이터 수집/정리/시각화를 확실한 실무 수준으로. PPOL 5203은 지도로 참고.",
+  goalEn: "Work through one book by hand. Learn Python from McKinney's free book, SQL from SQLBolt, and drill daily on pgexercises and DataLemur. A read→type→drill→commit loop builds Python, SQL, and data collection/cleaning/visualization to a solid working level. PPOL 5203 stays as a map.",
+  deliverable: "py-foundations + sql-practice + data-collection repos + 정제/회귀 재현 노트북 · book-and-drill portfolio"
+}, {
+  id: "p3",
+  name: "Phase 3",
+  title: "Causal Inference + Applied ML",
+  weeks: "Week 15–23",
+  color: "#5b21b6",
+  bg: "#ebe0ff",
+  goalKo: "차별점 단계. 인과추론(IV/DiD/RDD)을 주력으로, 예측 ML은 보조 비교축으로 둔다. 다른 사람이 공개한 깔끔한 causal/ML repo를 보고 구조를 흡수한 뒤, 하나씩 깊게 남긴다.",
+  goalEn: "Your differentiator phase. Lead with causal inference (IV/DiD/RDD) and keep predictive ML as a secondary benchmark. Learn from clean public causal/ML repos first, then go deep one project at a time.",
+  deliverable: "causal-inference-projects repo + one benchmark ML project + example repo notes"
+}, {
+  id: "p4",
+  name: "Phase 4",
+  title: "Spatial · Time Series · Communication",
+  weeks: "Week 24–27",
+  color: "#a04a06",
+  bg: "#fdeccf",
+  goalKo: "개발/정책에서 강점이 되는 공간분석과 시계열, 그리고 이해관계자용 커뮤니케이션 산출물을 묶는다. 예쁜 지도/대시보드 예제 repo를 참고해서 결과를 보여주는 레이어로 둔다.",
+  goalEn: "Combine spatial analysis, time series, and stakeholder-facing communication outputs. Borrow from polished map/dashboard example repos so this layer presents results, not just tools.",
+  deliverable: "공간분석 1개 + 시계열 또는 대시보드 1개 + example repo notes"
+}, {
+  id: "p5",
+  name: "Phase 5",
+  title: "Portfolio & Applications",
+  weeks: "Week 28–29",
+  color: "#046a4e",
+  bg: "#d6f3e6",
+  goalKo: "세 개의 대표 프로젝트를 공개 포트폴리오로 패키징하고, 좋은 공개 포트폴리오 사이트 예제를 참고해 이력서 bullets와 인터뷰 스토리를 정리한 뒤 지원을 시작한다.",
+  goalEn: "Package three flagship projects into a public portfolio, use strong public portfolio-site examples for inspiration, sharpen resume bullets and interview stories, then start applying.",
+  deliverable: "라이브 Quarto 포트폴리오 + 3개 flagship 프로젝트 + 인터뷰 치트시트 + portfolio examples"
+}];
+const DAYS = [
+// ═══════ PHASE 0 ═══════
+{
+  id: "f1",
+  phase: "p0",
+  week: 1,
+  day: 1,
+  titleKo: "미시경제학 직관 복습",
+  titleEn: "Microeconomics Intuition Review",
+  learnKo: "수요·공급, 탄력성, 한계 개념, 시장 균형을 직관 위주로 복습. 정책 분석의 언어를 다시 손에 익힌다.",
+  learnEn: "Review supply/demand, elasticity, marginal thinking, and market equilibrium at the intuition level — the language of policy analysis.",
+  concepts: [{
+    term_ko: "탄력성",
+    term_en: "Elasticity",
+    body_ko: "가격이나 소득이 변할 때 수요량(또는 공급량)이 얼마나 민감하게 반응하는지를 나타내는 비율이다. 탄력성이 1보다 크면 '탄력적'이라 하고, 가격을 올리면 총수입이 오히려 줄어든다.",
+    body_en: "The ratio measuring how sensitively quantity responds to a change in price or income. If elasticity exceeds 1 ('elastic'), raising price actually lowers total revenue."
+  }, {
+    term_ko: "한계 개념",
+    term_en: "Marginal thinking",
+    body_ko: "'한 단위를 더할 때의 추가 효과'를 뜻한다. 한계비용(MC)과 한계편익(MB)이 같아지는 지점에서 순편익이 극대화되며, 이것이 거의 모든 경제적 의사결정의 논리다.",
+    body_en: "The effect of 'one more unit.' Net benefit is maximized where marginal cost equals marginal benefit — the logic behind nearly every economic decision."
+  }, {
+    term_ko: "시장 균형",
+    term_en: "Market equilibrium",
+    body_ko: "수요량과 공급량이 일치하는 가격·수량의 점이다. 이 점에서 시장은 자연히 안정되며, 외부 충격은 새로운 균형으로 이동시킨다.",
+    body_en: "The price–quantity point where quantity demanded equals quantity supplied. The market settles here; external shocks shift it to a new equilibrium."
+  }, {
+    term_ko: "외부효과",
+    term_en: "Externality",
+    body_ko: "거래 당사자가 아닌 제3자에게 미치는 비용이나 편익이다(예: 공해, 백신). 사적 비용과 사회적 비용이 달라 시장이 사회적 최적을 달성하지 못하는 '시장실패'의 대표 사례다.",
+    body_en: "A cost or benefit falling on a third party (e.g., pollution, vaccines). Private and social costs diverge, making it a classic market failure where markets miss the social optimum."
+  }],
+  tasks: [{
+    label: "Khan Academy Microeconomics",
+    url: "https://www.khanacademy.org/economics-finance-domain/microeconomics"
+  }, {
+    label: "MRU Microeconomics (영상·video)",
+    url: "https://mru.org/courses/principles-economics-microeconomics"
+  }, {
+    label: "GitHub: finding inspiration",
+    url: "https://docs.github.com/en/get-started/start-your-journey/finding-inspiration-on-github"
+  }],
+  outputKo: "미시 핵심 개념 1페이지 치트시트",
+  outputEn: "One-page micro concept cheat-sheet",
+  quiz: [{
+    q_ko: "수요의 가격탄력성이 1보다 크면(탄력적) 가격 인상 시 총수입은?",
+    q_en: "If price elasticity of demand exceeds 1 (elastic), what happens to total revenue when price rises?",
+    a_ko: "감소한다. 수량 감소율이 가격 상승률보다 커서 총수입(P×Q)이 줄어든다.",
+    a_en: "It falls. The drop in quantity outweighs the price increase, so total revenue (P×Q) declines."
+  }, {
+    q_ko: "외부효과가 '시장실패'인 이유는?",
+    q_en: "Why is an externality a 'market failure'?",
+    a_ko: "사적 비용/편익과 사회적 비용/편익이 달라 시장 균형이 사회적 최적과 어긋나기 때문이다.",
+    a_en: "Because private and social costs/benefits diverge, the market equilibrium no longer matches the social optimum."
+  }, {
+    q_ko: "MC와 MB가 같아질 때까지 생산하는 이유는?",
+    q_en: "Why produce until MC equals MB?",
+    a_ko: "그 지점이 순편익을 극대화한다. MB>MC면 더 생산, MB<MC면 덜 생산이 이득이다.",
+    a_en: "That point maximizes net benefit. If MB>MC, produce more; if MB<MC, produce less."
+  }]
+}, {
+  id: "f2",
+  phase: "p0",
+  week: 1,
+  day: 2,
+  titleKo: "거시경제학 직관 복습",
+  titleEn: "Macroeconomics Intuition Review",
+  learnKo: "GDP, 인플레이션, 실업, 통화·재정정책의 큰 그림. ESG·개발·정책 데이터의 배경 지식을 잡는다.",
+  learnEn: "The big picture of GDP, inflation, unemployment, and monetary/fiscal policy — background behind ESG, development, and policy data.",
+  concepts: [{
+    term_ko: "명목 vs 실질 GDP",
+    term_en: "Nominal vs Real GDP",
+    body_ko: "명목 GDP는 당해 연도 가격으로, 실질 GDP는 기준연도 가격으로 평가한 총생산이다. 실질 GDP는 물가 변동을 제거해 '진짜 생산량'의 변화를 보여준다.",
+    body_en: "Nominal GDP values output at current prices; real GDP uses base-year prices. Real GDP strips out inflation to show changes in actual output."
+  }, {
+    term_ko: "인플레이션",
+    term_en: "Inflation",
+    body_ko: "물가 수준이 지속적으로 오르는 현상이다. 적당하면 정상이지만, 너무 높으면 화폐 가치와 구매력을 갉아먹는다.",
+    body_en: "A sustained rise in the general price level. Moderate inflation is normal, but high inflation erodes the value of money and purchasing power."
+  }, {
+    term_ko: "재정 vs 통화정책",
+    term_en: "Fiscal vs Monetary policy",
+    body_ko: "재정정책은 정부가 지출과 세금으로, 통화정책은 중앙은행이 금리와 통화량으로 경제를 조절한다. 주체와 수단이 다르다.",
+    body_en: "Fiscal policy uses government spending and taxes; monetary policy uses the central bank's rates and money supply. Different actors, different tools."
+  }, {
+    term_ko: "실업률",
+    term_en: "Unemployment rate",
+    body_ko: "경제활동인구 중 일자리를 찾지 못한 사람의 비율이다. 구직 포기자는 제외되므로 실제 노동시장 약세를 과소평가할 수 있다.",
+    body_en: "The share of the labor force unable to find work. It excludes discouraged workers, so it can understate true labor-market weakness."
+  }],
+  tasks: [{
+    label: "Khan Academy Macroeconomics",
+    url: "https://www.khanacademy.org/economics-finance-domain/macroeconomics"
+  }, {
+    label: "MRU Macroeconomics (영상·video)",
+    url: "https://mru.org/courses/principles-economics-macroeconomics"
+  }, {
+    label: "GitHub: finding inspiration",
+    url: "https://docs.github.com/en/get-started/start-your-journey/finding-inspiration-on-github"
+  }],
+  outputKo: "거시 핵심 개념 1페이지 치트시트",
+  outputEn: "One-page macro concept cheat-sheet",
+  quiz: [{
+    q_ko: "명목 GDP와 실질 GDP의 차이는?",
+    q_en: "Difference between nominal and real GDP?",
+    a_ko: "명목은 당해 가격, 실질은 기준연도 가격 — 실질은 물가변동을 제거해 생산량 변화를 본다.",
+    a_en: "Nominal uses current prices, real uses base-year prices — real removes inflation to isolate output changes."
+  }, {
+    q_ko: "중앙은행이 금리를 올리면 인플레이션에 어떤 영향?",
+    q_en: "How does raising the central bank rate affect inflation?",
+    a_ko: "차입·소비·투자가 줄어 총수요 감소 → 물가 상승 압력 완화.",
+    a_en: "Borrowing, consumption, and investment fall, lowering aggregate demand → easing price pressure."
+  }, {
+    q_ko: "재정정책과 통화정책의 주체·수단 차이는?",
+    q_en: "Who runs fiscal vs monetary policy, with what tools?",
+    a_ko: "재정=정부, 지출·세금. 통화=중앙은행, 금리·통화량.",
+    a_en: "Fiscal = government (spending, taxes). Monetary = central bank (rates, money supply)."
+  }]
+}, {
+  id: "f3",
+  phase: "p0",
+  week: 2,
+  day: 3,
+  titleKo: "확률·분포 복습",
+  titleEn: "Probability & Distributions Review",
+  learnKo: "확률, 확률변수, 주요 분포(정규·이항), 기댓값·분산. 통계 추론의 토대를 다진다.",
+  learnEn: "Probability, random variables, key distributions, expected value and variance — the foundation of inference.",
+  concepts: [{
+    term_ko: "확률변수",
+    term_en: "Random variable",
+    body_ko: "확률적으로 결정되는 결과를 숫자로 나타낸 것이다. 예: 주사위 눈, 가구 소득. 이산형(개수)과 연속형(측정값)으로 나뉜다.",
+    body_en: "A numerical representation of a random outcome (a die roll, household income). It is discrete (counts) or continuous (measurements)."
+  }, {
+    term_ko: "기댓값",
+    term_en: "Expected value",
+    body_ko: "무한히 반복했을 때의 장기 평균이다. 각 결과에 확률을 곱해 더한 값으로, 분포의 '중심 위치'를 알려준다.",
+    body_en: "The long-run average over infinite repetitions — each outcome weighted by its probability. It gives the distribution's center."
+  }, {
+    term_ko: "분산·표준편차",
+    term_en: "Variance / SD",
+    body_ko: "값들이 평균 주변으로 얼마나 흩어져 있는지의 척도다. 표준편차는 분산의 제곱근으로, 원래 단위로 해석할 수 있어 더 직관적이다.",
+    body_en: "A measure of spread around the mean. Standard deviation is the square root of variance, interpretable in the original units."
+  }, {
+    term_ko: "정규분포 & 중심극한정리",
+    term_en: "Normal distribution & CLT",
+    body_ko: "종 모양의 대칭 분포다. 중심극한정리(CLT)는 표본이 충분히 크면 표본평균의 분포가 모집단 모양과 무관하게 정규분포에 가까워진다는 정리로, 거의 모든 추론의 근거다.",
+    body_en: "A symmetric bell-shaped distribution. The CLT says that for large samples, the sample mean's distribution approaches normal regardless of the population's shape — the basis for most inference."
+  }],
+  tasks: [{
+    label: "Khan Academy Statistics & Probability",
+    url: "https://www.khanacademy.org/math/statistics-probability"
+  }, {
+    label: "StatQuest 통계 기초 playlist (영상·video)",
+    url: "https://www.youtube.com/playlist?list=PLblh5JKOoLUK0FLuzwntyYI10UQFUhsY9"
+  }, {
+    label: "GitHub example-code guide",
+    url: "https://docs.github.com/en/get-started/learning-to-code/finding-and-understanding-example-code"
+  }],
+  outputKo: "분포·기댓값 요약 노트",
+  outputEn: "Distributions & expectation summary note",
+  quiz: [{
+    q_ko: "중심극한정리(CLT)가 말하는 것은?",
+    q_en: "What does the CLT say?",
+    a_ko: "표본크기가 크면 표본평균의 분포가 모집단 분포와 무관하게 정규분포에 가까워진다.",
+    a_en: "For large samples, the sampling distribution of the mean approaches normal regardless of the population."
+  }, {
+    q_ko: "기댓값과 분산의 직관적 의미는?",
+    q_en: "Intuitive meaning of expected value and variance?",
+    a_ko: "기댓값=장기 평균 위치, 분산=평균 주변 퍼짐.",
+    a_en: "Expected value = long-run center; variance = spread around it."
+  }, {
+    q_ko: "정규분포에서 평균±2 표준편차 안의 비율은?",
+    q_en: "Share within ±2 SD of the mean in a normal distribution?",
+    a_ko: "약 95% (68-95-99.7 법칙).",
+    a_en: "About 95% (68-95-99.7 rule)."
+  }]
+}, {
+  id: "f4",
+  phase: "p0",
+  week: 2,
+  day: 4,
+  titleKo: "추정·가설검정 복습",
+  titleEn: "Estimation & Hypothesis Testing",
+  learnKo: "표본에서 모집단을 추론하는 법 — 신뢰구간, 가설검정, p-value, 1·2종 오류. 검정력 분석으로 가는 직접 디딤돌이자 면접 단골.",
+  learnEn: "Inferring the population from a sample — CIs, hypothesis testing, p-values, Type I/II errors. The direct stepping-stone to power analysis and an interview staple.",
+  concepts: [{
+    term_ko: "신뢰구간",
+    term_en: "Confidence interval (CI)",
+    body_ko: "모수(참값)가 들어있을 것으로 추정되는 구간이다. '95% 신뢰구간'은 같은 방법으로 반복 추출하면 그 구간들의 약 95%가 참값을 포함한다는 뜻이지, 한 구간에 95% 확률이 있다는 뜻이 아니다.",
+    body_en: "A range estimated to contain the true parameter. A '95% CI' means ~95% of such intervals contain the true value across repeated samples — not a 95% probability for one interval."
+  }, {
+    term_ko: "p-value",
+    term_en: "p-value",
+    body_ko: "귀무가설이 참이라고 가정했을 때, 관측된 것만큼 또는 그 이상으로 극단적인 결과가 나올 확률이다. 효과의 크기가 아니라 '우연히 이 정도가 나올 가능성'을 뜻한다.",
+    body_en: "The probability of a result at least as extreme as observed, assuming the null is true. It measures surprise under the null — not effect size."
+  }, {
+    term_ko: "1종·2종 오류",
+    term_en: "Type I / Type II error",
+    body_ko: "1종 오류(α)는 참인 귀무가설을 잘못 기각(거짓양성), 2종 오류(β)는 거짓인 귀무가설을 채택(거짓음성)이다. 검정력 분석은 바로 이 2종 오류를 줄이려는 작업이다.",
+    body_en: "Type I (α) wrongly rejects a true null (false positive); Type II (β) fails to reject a false null (false negative). Power analysis is the effort to reduce Type II error."
+  }, {
+    term_ko: "검정력",
+    term_en: "Statistical power",
+    body_ko: "실제로 효과가 존재할 때 그것을 통계적으로 탐지해낼 확률(1−β)이다. 보통 0.8을 목표로 한다. 표본이 작으면 검정력이 낮아 진짜 효과도 놓친다.",
+    body_en: "The probability (1−β) of detecting an effect that truly exists; usually targeted at 0.8. Small samples mean low power, so real effects get missed."
+  }],
+  tasks: [{
+    label: "Khan Academy: Significance tests",
+    url: "https://www.khanacademy.org/math/statistics-probability/significance-tests-one-sample"
+  }, {
+    label: "StatQuest: p-values, CI (영상·video)",
+    url: "https://www.youtube.com/playlist?list=PLblh5JKOoLUK0FLuzwntyYI10UQFUhsY9"
+  }, {
+    label: "GitHub example-code guide",
+    url: "https://docs.github.com/en/get-started/learning-to-code/finding-and-understanding-example-code"
+  }],
+  outputKo: "가설검정 절차 요약 + 연습문제 풀이",
+  outputEn: "Hypothesis-testing summary + problem set",
+  quiz: [{
+    q_ko: "p-value의 정확한 정의는?",
+    q_en: "Precise definition of a p-value?",
+    a_ko: "귀무가설이 참이라 가정했을 때 관측된 것만큼 또는 그 이상 극단적인 결과가 나올 확률. (효과 크기가 아님)",
+    a_en: "The probability of a result at least as extreme as observed, assuming the null is true. (Not effect size.)"
+  }, {
+    q_ko: "1종 오류와 2종 오류의 차이는?",
+    q_en: "Type I vs Type II error?",
+    a_ko: "1종(α)=참인 귀무가설 기각(거짓양성). 2종(β)=거짓인 귀무가설 채택(거짓음성).",
+    a_en: "Type I (α) = rejecting a true null (false positive). Type II (β) = accepting a false null (false negative)."
+  }, {
+    q_ko: "신뢰구간 95%의 올바른 해석은?",
+    q_en: "Correct interpretation of a 95% CI?",
+    a_ko: "반복 추출하면 그 구간들의 약 95%가 참 모수를 포함. (한 구간에 95% 확률이 아님)",
+    a_en: "Across repeated sampling, ~95% of such intervals contain the true parameter. (Not 95% for one interval.)"
+  }]
+}, {
+  id: "f5",
+  phase: "p0",
+  week: 3,
+  day: 5,
+  titleKo: "상관 vs 인과 + OLS 직관",
+  titleEn: "Correlation vs Causation + OLS",
+  learnKo: "상관과 인과의 차이, OLS 회귀의 기본 직관. PPOL 5101 복습이자 Phase 3 인과추론의 디딤돌.",
+  learnEn: "Correlation vs causation and basic OLS intuition. A PPOL 5101 review and the stepping-stone to Phase 3.",
+  concepts: [{
+    term_ko: "상관 ≠ 인과",
+    term_en: "Correlation ≠ causation",
+    body_ko: "두 변수가 함께 움직인다고 해서 하나가 다른 하나의 원인은 아니다. 공통 원인(교란)이나 역인과가 가짜 상관을 만들 수 있다. 예: 아이스크림 판매와 익사 사고는 둘 다 '여름(기온)'이 원인이다.",
+    body_en: "Co-movement doesn't mean causation. A common cause (confounding) or reverse causation can create spurious correlation — e.g., ice-cream sales and drownings are both driven by summer heat."
+  }, {
+    term_ko: "OLS 회귀",
+    term_en: "OLS regression",
+    body_ko: "최소제곱법으로 직선(또는 평면)을 데이터에 맞추는 방법이다. 계수는 '다른 변수를 고정했을 때 해당 변수 1단위 변화가 Y에 주는 평균 변화'로 해석한다.",
+    body_en: "Fits a line/plane by minimizing squared errors. A coefficient reads as the average change in Y per one-unit change, holding others fixed."
+  }, {
+    term_ko: "결정계수 R²",
+    term_en: "R-squared",
+    body_ko: "모형이 설명하는 종속변수 분산의 비율이다. 적합도(설명력)일 뿐 인과의 증거가 아니다. R²가 높아도 교란이나 역인과가 있을 수 있다.",
+    body_en: "The share of the outcome's variance explained. It is goodness-of-fit, not causal evidence — a high R² can still hide confounding or reverse causation."
+  }, {
+    term_ko: "교란",
+    term_en: "Confounding",
+    body_ko: "X와 Y 모두에 영향을 주는 제3의 변수가 가짜 관계를 만드는 현상이다. 이 변수를 통제하지 않으면 추정치가 왜곡된다(누락변수 편의).",
+    body_en: "A third variable affecting both X and Y creates a spurious link. Failing to control for it biases the estimate (omitted-variable bias)."
+  }],
+  tasks: [{
+    label: "Econometrics Academy: Intro (영상·video)",
+    url: "https://www.youtube.com/user/econometricsacademy"
+  }, {
+    label: "Khan Academy: Regression",
+    url: "https://www.khanacademy.org/math/statistics-probability/describing-relationships-quantitative-data"
+  }, {
+    label: "GitHub: finding inspiration",
+    url: "https://docs.github.com/en/get-started/start-your-journey/finding-inspiration-on-github"
+  }],
+  outputKo: "'상관≠인과' 사례 3개 + OLS 해석 노트",
+  outputEn: "Three 'correlation≠causation' cases + OLS note",
+  quiz: [{
+    q_ko: "R²가 높으면 인과관계가 강하다고 할 수 있나?",
+    q_en: "Does a high R² imply strong causation?",
+    a_ko: "아니다. R²는 적합도일 뿐 인과의 증거가 아니다. 교란·역인과가 있어도 높을 수 있다.",
+    a_en: "No. R² is goodness-of-fit, not causal evidence; it can be high even with confounding."
+  }, {
+    q_ko: "회귀계수의 'ceteris paribus' 해석이란?",
+    q_en: "The 'ceteris paribus' interpretation?",
+    a_ko: "모형 내 다른 변수를 고정한 채 해당 변수 1단위 변화가 Y에 주는 평균 효과.",
+    a_en: "The average effect on Y of a one-unit change, holding other model variables fixed."
+  }, {
+    q_ko: "아이스크림 판매와 익사가 상관되는 이유는?",
+    q_en: "Why are ice-cream sales and drownings correlated?",
+    a_ko: "공통원인(기온/여름)이 둘 다 끌어올린다 — 교란에 의한 가짜 상관.",
+    a_en: "A common cause (summer heat) drives both — spurious correlation via a confounder."
+  }]
+}, {
+  id: "f6",
+  phase: "p0",
+  week: 3,
+  day: 6,
+  titleKo: "개발/공공 경제학 + 영향평가",
+  titleEn: "Development/Public Econ + Impact Eval",
+  learnKo: "빈곤, 공공재, 시장실패, 정책개입 평가의 기본 틀. 너의 도메인 강점을 데이터와 잇는 다리이자 gui2de류 직무의 핵심 언어.",
+  learnEn: "Poverty, public goods, market failure, and policy-evaluation frameworks — the bridge from your domain strength to data, and the core language of gui2de-type jobs.",
+  concepts: [{
+    term_ko: "공공재",
+    term_en: "Public good",
+    body_ko: "비경합성(한 사람의 소비가 남의 소비를 줄이지 않음)과 비배제성(대가를 안 낸 사람도 막을 수 없음)을 가진 재화다. 예: 국방, 공공보건. 시장이 충분히 공급하지 못해 정부 개입의 근거가 된다.",
+    body_en: "A good that is non-rival (one's use doesn't reduce another's) and non-excludable (you can't stop non-payers). Markets under-supply it, justifying government provision."
+  }, {
+    term_ko: "빈곤 함정",
+    term_en: "Poverty trap",
+    body_ko: "빈곤이 또 다른 빈곤을 낳는 자기강화 메커니즘이다. 예: 영양 부족 → 학습 저하 → 소득 저하 → 다시 영양 부족. 개입이 이 고리를 끊을 수 있는지가 핵심 질문이다.",
+    body_en: "A self-reinforcing loop where poverty begets poverty (poor nutrition → worse learning → lower income → poor nutrition). The key question is whether an intervention can break it."
+  }, {
+    term_ko: "영향평가",
+    term_en: "Impact evaluation",
+    body_ko: "정책이나 프로그램이 실제로 효과가 있었는지를 인과적으로 평가하는 작업이다. 단순 전후 비교가 아니라 '개입이 없었다면(반사실)'을 대조군으로 추정해 다른 시간 변화를 분리한다.",
+    body_en: "A causal assessment of whether a program worked. Rather than before-after, it estimates the counterfactual via a control group to separate the effect from other time trends."
+  }, {
+    term_ko: "무작위 통제실험",
+    term_en: "Randomized Controlled Trial (RCT)",
+    body_ko: "참가자를 무작위로 처치군과 대조군에 배정하는 실험이다. 무작위 배정 덕분에 두 군이 평균적으로 동일해져 교란이 제거되므로, 인과추론의 '황금률'로 불린다. gui2de의 핵심 방법론이다.",
+    body_en: "Randomly assigns participants to treatment and control. Randomization makes the groups equivalent on average, removing confounding — the 'gold standard,' and gui2de's core method."
+  }],
+  tasks: [{
+    label: "MIT OCW 14.73 Challenge of World Poverty",
+    url: "https://ocw.mit.edu/courses/14-73-the-challenge-of-world-poverty-spring-2011/"
+  }, {
+    label: "World Bank: Impact Evaluation in Practice (무료 PDF)",
+    url: "https://www.worldbank.org/en/programs/sief-trust-fund/publication/impact-evaluation-in-practice"
+  }, {
+    label: "GitHub example-code guide",
+    url: "https://docs.github.com/en/get-started/learning-to-code/finding-and-understanding-example-code"
+  }],
+  outputKo: "관심 정책 1개를 '평가 가능한 질문'으로 재구성",
+  outputEn: "Reframe one policy as an 'evaluable question'",
+  quiz: [{
+    q_ko: "RCT가 인과추론의 '황금률'인 이유는?",
+    q_en: "Why is an RCT the 'gold standard'?",
+    a_ko: "무작위 배정으로 처치군·대조군이 평균적으로 동일해져 교란이 제거되기 때문.",
+    a_en: "Random assignment makes the groups equivalent on average, eliminating confounding."
+  }, {
+    q_ko: "공공재의 두 특성은?",
+    q_en: "Two properties of a public good?",
+    a_ko: "비경합성과 비배제성.",
+    a_en: "Non-rivalry and non-excludability."
+  }, {
+    q_ko: "영향평가가 단순 전후 비교보다 나은 이유는?",
+    q_en: "Why is impact evaluation better than before-after?",
+    a_ko: "반사실을 대조군으로 추정해 정책 외 시간 변화를 분리하기 때문.",
+    a_en: "It estimates the counterfactual via a control group, separating the effect from other time trends."
+  }]
+},
+// ═══════ PHASE 1 ═══════
+{
+  id: "d1",
+  phase: "p1",
+  week: 4,
+  day: 7,
+  titleKo: "툴체인 셋업 + ggplot 첫 시각화",
+  titleEn: "Toolchain Setup + First ggplot",
+  learnKo: "작업 환경을 갖추고 ggplot2 기본 문법을 잡는다. 데이터를 그래프로 옮기는 '문법(grammar of graphics)'의 출발점.",
+  learnEn: "Set up your environment and learn ggplot2's grammar — the start of the 'grammar of graphics' that turns data into plots.",
+  concepts: [{
+    term_ko: "ggplot2",
+    term_en: "ggplot2",
+    body_ko: "레이어를 차곡차곡 쌓아 그래프를 만드는 R 시각화 패키지다. '데이터 + 매핑 + geom'을 더해가며 어떤 그래프든 같은 문법으로 구성한다.",
+    body_en: "An R package that builds plots by stacking layers. Adding 'data + mapping + geom' lets you compose any chart with one consistent grammar."
+  }, {
+    term_ko: "미적 매핑",
+    term_en: "aes() — aesthetic mapping",
+    body_ko: "데이터의 변수를 그래프의 시각 속성(x축, y축, 색, 크기 등)에 연결하는 함수다. 예: aes(x=소득, y=수명, color=대륙).",
+    body_en: "The function linking data variables to visual properties (x, y, color, size). Example: aes(x=income, y=lifespan, color=continent)."
+  }, {
+    term_ko: "기하 객체",
+    term_en: "geom",
+    body_ko: "데이터를 어떤 도형으로 그릴지 정하는 레이어다. geom_point(산점도), geom_line(선), geom_bar(막대) 등이 있다.",
+    body_en: "The layer deciding what shape represents the data: geom_point (scatter), geom_line, geom_bar, etc."
+  }, {
+    term_ko: "Quarto",
+    term_en: "Quarto",
+    body_ko: "코드, 설명 글, 실행 결과를 하나의 문서로 엮어 HTML/PDF로 출판하는 재현가능 도구다. 분석 리포트와 포트폴리오 사이트를 모두 만들 수 있다.",
+    body_en: "A reproducible tool weaving code, prose, and output into one document rendered to HTML/PDF — for both reports and portfolio sites."
+  }],
+  tasks: [{
+    label: "R, RStudio, Quarto, Git 설치·install",
+    url: "https://posit.co/download/rstudio-desktop/"
+  }, {
+    label: "GitHub repo 'ds-curriculum-phase1' 생성·create",
+    url: "https://github.com/new"
+  }, {
+    label: "R4DS Ch.1 Data visualization",
+    url: "https://r4ds.hadley.nz/data-visualize"
+  }, {
+    label: "Example repo: clean Quarto project",
+    url: "https://github.com/search?q=quarto+example+repository&type=repositories"
+  }],
+  outputKo: "ggplot 하나를 Quarto에 렌더링 → 첫 커밋",
+  outputEn: "Render one ggplot in Quarto → first commit",
+  quiz: [{
+    q_ko: "데이터 변수를 x축·색에 연결하는 함수는?",
+    q_en: "Function mapping variables to x-axis, color, etc.?",
+    a_ko: "aes(). 예: aes(x=displ, y=hwy, color=class)",
+    a_en: "aes(). Example: aes(x=displ, y=hwy, color=class)"
+  }, {
+    q_ko: "산점도를 그리는 geom 함수는?",
+    q_en: "Which geom draws a scatter plot?",
+    a_ko: "geom_point()",
+    a_en: "geom_point()"
+  }, {
+    q_ko: "ggplot에서 '+' 기호의 역할은?",
+    q_en: "What does '+' do in ggplot?",
+    a_ko: "레이어(geom/scale/theme)를 더하는 연산자.",
+    a_en: "It adds layers (geom/scale/theme)."
+  }]
+}, {
+  id: "d2",
+  phase: "p1",
+  week: 4,
+  day: 8,
+  titleKo: "dplyr 동사",
+  titleEn: "dplyr Verbs",
+  learnKo: "filter/select/mutate/summarize/group_by — 데이터 분석의 90%가 이 동사들의 조합이다.",
+  learnEn: "filter/select/mutate/summarize/group_by — 90% of analysis is combinations of these verbs.",
+  concepts: [{
+    term_ko: "파이프",
+    term_en: "Pipe (|>)",
+    body_ko: "앞의 결과를 다음 함수의 첫 인자로 넘기는 연결 연산자다. 중첩 괄호 대신 왼쪽→오른쪽으로 단계를 읽게 해줘 가독성이 크게 좋아진다.",
+    body_en: "An operator passing the previous result into the next function. It replaces nested parentheses with left-to-right steps, greatly improving readability."
+  }, {
+    term_ko: "filter() / select()",
+    term_en: "filter() / select()",
+    body_ko: "filter()는 조건에 맞는 '행(관측치)'을 남기고, select()는 원하는 '열(변수)'을 고른다. 행과 열을 다루는 도구가 다르다는 점이 핵심이다.",
+    body_en: "filter() keeps 'rows' meeting a condition; select() picks 'columns.' The key: rows and columns use different tools."
+  }, {
+    term_ko: "mutate()",
+    term_en: "mutate()",
+    body_ko: "기존 열을 변형하거나 새 열을 만든다. 예: mutate(인당소득 = 소득 / 인구).",
+    body_en: "Creates or transforms columns. Example: mutate(income_pc = income / population)."
+  }, {
+    term_ko: "group_by() + summarize()",
+    term_en: "group_by() + summarize()",
+    body_ko: "group_by()로 그룹을 나눈 뒤 summarize()로 각 그룹의 요약값(평균, 합계 등)을 계산한다. SQL의 GROUP BY와 같은 개념이다.",
+    body_en: "group_by() splits into groups, summarize() computes per-group summaries — the same concept as SQL's GROUP BY."
+  }],
+  tasks: [{
+    label: "R4DS Ch.3 Data transformation",
+    url: "https://r4ds.hadley.nz/data-transform"
+  }, {
+    label: "Example repo: tidyverse pipeline",
+    url: "https://github.com/search?q=tidyverse+example+repository&type=repositories"
+  }],
+  outputKo: "dplyr 파이프라인 스크립트",
+  outputEn: "A dplyr pipeline script",
+  quiz: [{
+    q_ko: "행 필터 동사와 그룹 요약 조합은?",
+    q_en: "Row-filter verb and group-summary combo?",
+    a_ko: "filter(); group_by()+summarize()",
+    a_en: "filter(); group_by()+summarize()"
+  }, {
+    q_ko: "select와 filter의 차이는?",
+    q_en: "select vs filter?",
+    a_ko: "select=열 선택, filter=행 조건 선택.",
+    a_en: "select picks columns; filter picks rows."
+  }, {
+    q_ko: "파이프의 가독성 이점은?",
+    q_en: "Readability benefit of the pipe?",
+    a_ko: "중첩 괄호 대신 좌→우로 단계를 읽게 해준다.",
+    a_en: "Read steps left-to-right instead of nested parentheses."
+  }]
+}, {
+  id: "d3",
+  phase: "p1",
+  week: 5,
+  day: 9,
+  titleKo: "Tidy data + pivot + 임포트",
+  titleEn: "Tidy Data + Pivot + Import",
+  learnKo: "tidy data의 정의와 wide↔long 변환, 외부 CSV 임포트를 익힌다.",
+  learnEn: "Learn tidy data, wide↔long reshaping, and CSV import.",
+  concepts: [{
+    term_ko: "정돈된 데이터",
+    term_en: "Tidy data",
+    body_ko: "각 변수가 하나의 열, 각 관측치가 하나의 행, 각 관측 단위가 하나의 표인 표준 형태다. 이 형태면 거의 모든 tidyverse 도구가 매끄럽게 작동한다.",
+    body_en: "A standard form: each variable a column, each observation a row, each unit a table. Nearly all tidyverse tools work smoothly in this shape."
+  }, {
+    term_ko: "pivot_longer / pivot_wider",
+    term_en: "pivot_longer / pivot_wider",
+    body_ko: "pivot_longer()는 가로로 펼쳐진 데이터(예: 연도별 열)를 세로로 모으고, pivot_wider()는 그 반대다. 분석하기 좋은 long 형태로 바꾸는 일이 잦다.",
+    body_en: "pivot_longer() gathers wide data (e.g., year columns) into long form; pivot_wider() does the reverse. Reshaping to long is common."
+  }, {
+    term_ko: "read_csv()",
+    term_en: "read_csv()",
+    body_ko: "readr 패키지의 CSV 임포트 함수다. base R의 read.csv보다 빠르고, 문자열을 자동으로 factor로 바꾸지 않으며, 깔끔한 tibble을 반환한다.",
+    body_en: "readr's CSV import. Faster than base R's read.csv, no auto string-to-factor, and returns a clean tibble."
+  }, {
+    term_ko: "tibble",
+    term_en: "tibble",
+    body_ko: "현대적 데이터프레임이다. 출력이 간결하고, 자동 형변환을 하지 않아 예기치 못한 오류를 줄여준다.",
+    body_en: "A modern data frame: concise printing and no surprising type conversions."
+  }],
+  tasks: [{
+    label: "R4DS Ch.5 Data tidying",
+    url: "https://r4ds.hadley.nz/data-tidy"
+  }, {
+    label: "R4DS Ch.7 Data import",
+    url: "https://r4ds.hadley.nz/import"
+  }, {
+    label: "Example repo: data import/tidy workflow",
+    url: "https://github.com/search?q=r+tidyverse+data+import+example+repository&type=repositories"
+  }],
+  outputKo: "지저분한 데이터 tidy화 + World Bank 데이터 임포트",
+  outputEn: "Tidy a messy dataset + import World Bank data",
+  quiz: [{
+    q_ko: "wide→long, long→wide 함수는?",
+    q_en: "Functions for wide→long, long→wide?",
+    a_ko: "pivot_longer(), pivot_wider()",
+    a_en: "pivot_longer(), pivot_wider()"
+  }, {
+    q_ko: "tidy data 세 규칙은?",
+    q_en: "Three rules of tidy data?",
+    a_ko: "변수=열, 관측치=행, 관측단위=표.",
+    a_en: "Variable=column, observation=row, unit=table."
+  }, {
+    q_ko: "read_csv가 read.csv보다 나은 점은?",
+    q_en: "Why read_csv over read.csv?",
+    a_ko: "빠르고, 자동 factor 변환이 없고, tibble을 반환한다.",
+    a_en: "Faster, no auto-factor, returns a tibble."
+  }]
+}, {
+  id: "d4",
+  phase: "p1",
+  week: 5,
+  day: 10,
+  titleKo: "EDA + 시각화 커뮤니케이션",
+  titleEn: "EDA + Visual Communication",
+  learnKo: "탐색적 분석(변동·공변동)과 출판 품질 그래프 만들기를 익힌다.",
+  learnEn: "Learn exploratory analysis (variation & covariation) and publication-quality graphics.",
+  concepts: [{
+    term_ko: "탐색적 데이터 분석",
+    term_en: "EDA",
+    body_ko: "본격 모델링 전에 데이터에 질문을 던지며 패턴·이상치·관계를 찾는 단계다. 가설을 만들고 데이터 품질을 점검하는 반복 과정이다.",
+    body_en: "Interrogating data to find patterns, outliers, and relationships before formal modeling — iterative hypothesis-forming and quality-checking."
+  }, {
+    term_ko: "변동 vs 공변동",
+    term_en: "Variation vs Covariation",
+    body_ko: "변동은 한 변수 내부의 흩어짐(분포)이고, 공변동은 두 변수가 함께 변하는 패턴이다. EDA의 두 핵심 질문이다.",
+    body_en: "Variation is spread within one variable; covariation is how two variables move together. EDA's two core questions."
+  }, {
+    term_ko: "labs()",
+    term_en: "labs()",
+    body_ko: "그래프에 제목, 부제, 축 라벨, 캡션, 범례 제목을 한 번에 다는 함수다. 출판 품질의 그림은 항상 명확한 라벨에서 시작한다.",
+    body_en: "Sets title, subtitle, axis labels, caption, and legend titles at once. Publication-quality figures start with clear labels."
+  }, {
+    term_ko: "테마",
+    term_en: "theme()",
+    body_ko: "폰트, 배경, 격자선 등 데이터가 아닌 시각 요소의 스타일을 조정한다. 일관된 테마는 포트폴리오의 전문성을 높인다.",
+    body_en: "Controls non-data elements — fonts, background, gridlines. A consistent theme raises portfolio professionalism."
+  }],
+  tasks: [{
+    label: "R4DS Ch.10 EDA",
+    url: "https://r4ds.hadley.nz/eda"
+  }, {
+    label: "R4DS Ch.11 Communication",
+    url: "https://r4ds.hadley.nz/communication"
+  }, {
+    label: "Example repo: EDA report",
+    url: "https://github.com/search?q=eda+report+quarto+example+repository&type=repositories"
+  }],
+  outputKo: "Our World in Data 데이터로 EDA Quarto 리포트",
+  outputEn: "An EDA Quarto report on an OWID dataset",
+  quiz: [{
+    q_ko: "EDA의 두 핵심 질문은?",
+    q_en: "EDA's two core questions?",
+    a_ko: "변동(분포)과 공변동(변수 간 관계).",
+    a_en: "Variation (distribution) and covariation (relationships)."
+  }, {
+    q_ko: "제목·축라벨·캡션을 한 번에 다는 함수는?",
+    q_en: "Function for title/labels/caption at once?",
+    a_ko: "labs()",
+    a_en: "labs()"
+  }, {
+    q_ko: "이상치를 바로 삭제하면 안 되는 이유는?",
+    q_en: "Why not delete outliers immediately?",
+    a_ko: "오류일 수도, 중요한 신호일 수도 있다. 원인 확인 후 판단.",
+    a_en: "They may be errors — or signals. Investigate before deciding."
+  }]
+}, {
+  id: "d5",
+  phase: "p1",
+  week: 6,
+  day: 11,
+  titleKo: "논리·문자열·조인",
+  titleEn: "Logicals, Strings, Joins",
+  learnKo: "결측 처리, 문자열·정규식, 테이블 조인을 익힌다. 조인은 다음 Phase의 SQL과 동일 개념이다.",
+  learnEn: "Missing-value handling, strings/regex, and joins. Joins are the same concept as SQL next phase.",
+  concepts: [{
+    term_ko: "결측값 & is.na()",
+    term_en: "Missing values & is.na()",
+    body_ko: "NA는 '알 수 없는 값'을 뜻한다. NA==NA 도 NA를 반환하므로 ==로는 못 잡고 is.na()로 판별한다. 평균 등은 na.rm=TRUE로 결측을 제외한다.",
+    body_en: "NA means 'unknown.' Since NA==NA returns NA, use is.na() to detect it. Use na.rm=TRUE to drop missings in mean, etc."
+  }, {
+    term_ko: "case_when()",
+    term_en: "case_when()",
+    body_ko: "여러 조건에 따라 다른 값을 부여하는 함수다. 여러 if-else를 깔끔하게 대체한다. 예: 소득 구간을 '저/중/고'로 분류.",
+    body_en: "Assigns values across multiple conditions, cleanly replacing chained if-else — e.g., binning income into low/mid/high."
+  }, {
+    term_ko: "정규표현식",
+    term_en: "Regex",
+    body_ko: "문자 패턴을 기술하는 언어다. \\d는 숫자 하나, ^는 시작, $는 끝을 뜻한다. stringr 패키지로 텍스트를 탐지·치환·추출한다.",
+    body_en: "A language for text patterns: \\d a digit, ^ start, $ end. The stringr package detects, replaces, and extracts text."
+  }, {
+    term_ko: "조인 (left vs inner)",
+    term_en: "Joins (left vs inner)",
+    body_ko: "left_join은 왼쪽 테이블의 모든 행을 유지하고 매칭이 없으면 NA를 채운다. inner_join은 양쪽 모두 매칭되는 행만 남긴다. 키에 중복이 있으면 행이 곱해지니 주의한다.",
+    body_en: "left_join keeps all left rows (NA where no match); inner_join keeps only matched rows. Beware: duplicate keys multiply rows."
+  }],
+  tasks: [{
+    label: "R4DS Ch.12 Logical vectors",
+    url: "https://r4ds.hadley.nz/logicals"
+  }, {
+    label: "R4DS Ch.14 Strings",
+    url: "https://r4ds.hadley.nz/strings"
+  }, {
+    label: "R4DS Ch.19 Joins",
+    url: "https://r4ds.hadley.nz/joins"
+  }, {
+    label: "Example repo: joins/text cleaning",
+    url: "https://github.com/search?q=r+joins+text+cleaning+example+repository&type=repositories"
+  }],
+  outputKo: "두 공개 데이터 조인 + 텍스트 컬럼 정제",
+  outputEn: "Join two datasets + clean a text column",
+  quiz: [{
+    q_ko: "결측 판별 함수와 x==NA가 안 되는 이유는?",
+    q_en: "Missing-value function, and why x==NA fails?",
+    a_ko: "is.na(x). NA==NA도 NA를 반환하기 때문.",
+    a_en: "is.na(x). Because NA==NA also returns NA."
+  }, {
+    q_ko: "left_join vs inner_join은?",
+    q_en: "left_join vs inner_join?",
+    a_ko: "left=왼쪽 전체 유지(매칭 없으면 NA), inner=양쪽 매칭만.",
+    a_en: "left = all left rows (NA if no match); inner = matched only."
+  }, {
+    q_ko: "조인 키에 중복이 있으면?",
+    q_en: "What if join keys have duplicates?",
+    a_ko: "행이 곱해져(many-to-many) 데이터가 의도치 않게 불어난다.",
+    a_en: "Rows multiply (many-to-many), inflating the data."
+  }]
+}, {
+  id: "d6",
+  phase: "p1",
+  week: 6,
+  day: 12,
+  titleKo: "Quarto/Git + 사이트 뼈대",
+  titleEn: "Quarto/Git + Site Scaffold",
+  learnKo: "재현가능 출판과 버전관리를 복습하고, Phase 5에서 배포할 포트폴리오 사이트의 뼈대를 만든다.",
+  learnEn: "Review reproducible publishing and version control; scaffold the portfolio site you'll deploy in Phase 5.",
+  concepts: [{
+    term_ko: "청크 옵션",
+    term_en: "Chunk options",
+    body_ko: "Quarto 코드 청크의 동작을 제어하는 설정이다. #| echo: false는 코드를 숨기고 결과만 보이며, #| eval: false는 코드를 표시하되 실행하지 않는다.",
+    body_en: "Settings controlling a Quarto chunk. #| echo: false hides code but shows output; #| eval: false shows code without running it."
+  }, {
+    term_ko: "커밋 / 푸시",
+    term_en: "Commit / Push",
+    body_ko: "commit은 변경의 스냅샷을 로컬에 기록하는 것이고, push는 그 기록을 GitHub로 올리는 것이다. add→commit→push가 기본 흐름이다.",
+    body_en: "A commit records a snapshot locally; push uploads it to GitHub. The flow is add→commit→push."
+  }, {
+    term_ko: ".gitignore",
+    term_en: ".gitignore",
+    body_ko: "Git이 추적하지 않을 파일·폴더를 적는 목록이다. data/, *.csv, 대용량·민감 파일을 넣어 저장소를 깨끗하고 안전하게 유지한다.",
+    body_en: "A list of files Git should not track. Add data/, *.csv, large/sensitive files to keep the repo clean and safe."
+  }, {
+    term_ko: "렌더링",
+    term_en: "Render",
+    body_ko: "Quarto 문서(.qmd)를 HTML, PDF, 워드 등 최종 산출물로 변환하는 과정이다. 같은 소스로 여러 형식을 만들 수 있다.",
+    body_en: "Converting a .qmd source into HTML/PDF/Word. One source, multiple output formats."
+  }],
+  tasks: [{
+    label: "PPOL 5203 Week 2: Version Control (Git/GitHub)",
+    url: "https://tiagoventura.github.io/ppol5203/weeks/week-02.html"
+  }, {
+    label: "Quarto Websites 가이드",
+    url: "https://quarto.org/docs/websites/"
+  }, {
+    label: "Example repo: Quarto portfolio site",
+    url: "https://github.com/search?q=quarto+portfolio+site+example+repository&type=repositories"
+  }],
+  outputKo: "Quarto 사이트 로컬 스캐폴딩 + .gitignore 설정",
+  outputEn: "Scaffold a Quarto site + set up .gitignore",
+  quiz: [{
+    q_ko: "코드 숨기고 결과만 보이는 옵션은?",
+    q_en: "Option to hide code but show output?",
+    a_ko: "#| echo: false",
+    a_en: "#| echo: false"
+  }, {
+    q_ko: "add/commit/push 구분은?",
+    q_en: "add vs commit vs push?",
+    a_ko: "add=무대에 올림, commit=로컬 기록, push=원격 업로드.",
+    a_en: "add=stage, commit=record locally, push=upload to remote."
+  }, {
+    q_ko: "데이터 파일을 GitHub에서 빼려면?",
+    q_en: "How to keep data files off GitHub?",
+    a_ko: ".gitignore에 data/ 또는 *.csv 추가.",
+    a_en: "Add data/ or *.csv to .gitignore."
+  }]
+}, {
+  id: "d7",
+  phase: "p1",
+  week: 7,
+  day: 13,
+  titleKo: "The Effect: DAG + back door",
+  titleEn: "The Effect: DAGs + Back Doors",
+  learnKo: "인과 식별, 인과 다이어그램(DAG), 교란경로 닫기, 통제하면 안 되는 변수를 익힌다.",
+  learnEn: "Causal identification, DAGs, closing confounding paths, and which variables not to control for.",
+  concepts: [{
+    term_ko: "인과 다이어그램",
+    term_en: "DAG",
+    body_ko: "변수들 사이의 인과 관계를 화살표로 그린 그림이다. 무엇을 통제해야 하고 무엇을 통제하면 안 되는지를 시각적으로 판단하게 해준다.",
+    body_en: "A diagram of causal relationships as arrows. It lets you reason visually about what to control for and what not to."
+  }, {
+    term_ko: "교란변수",
+    term_en: "Confounder",
+    body_ko: "처치(X)와 결과(Y) 양쪽에 영향을 주는 공통 원인이다. 통제하지 않으면 X→Y 추정치가 왜곡된다. 통제해야 할 대표 변수다.",
+    body_en: "A common cause of treatment (X) and outcome (Y). Left uncontrolled it biases X→Y. This is the variable you should control for."
+  }, {
+    term_ko: "충돌변수",
+    term_en: "Collider",
+    body_ko: "두 변수의 공통 '결과'다. 통제하면 닫혀 있던 비인과 경로가 열려 가짜 상관(선택편향)이 생긴다. 절대 통제하면 안 되는 변수다.",
+    body_en: "A common 'effect' of two variables. Controlling it opens a closed non-causal path, creating selection bias. Never control for it."
+  }, {
+    term_ko: "백도어 경로",
+    term_en: "Back-door path",
+    body_ko: "X→Y의 인과 경로가 아니라 공통 원인을 통해 X와 Y를 잇는 비인과적 경로다. 이 경로를 (교란변수 통제로) 닫아야 편향 없는 인과효과를 얻는다.",
+    body_en: "A non-causal path linking X and Y via a common cause. Close it (by controlling the confounder) to get an unbiased causal effect."
+  }],
+  tasks: [{
+    label: "The Effect Ch.5–8 (식별·DAG·back door)",
+    url: "https://theeffectbook.net/ch-Identification.html"
+  }, {
+    label: "Example repo: causal identification notebook",
+    url: "https://github.com/search?q=causal+inference+notebook+example+repository&type=repositories"
+  }],
+  outputKo: "ggdag로 DAG 2개 + front/back door 식별",
+  outputEn: "Draw 2 DAGs + identify front/back doors",
+  quiz: [{
+    q_ko: "back-door path란?",
+    q_en: "What is a back-door path?",
+    a_ko: "공통원인을 통해 X와 Y를 잇는 비인과 경로. 막아야 편향이 제거된다.",
+    a_en: "A non-causal path via a common cause; closing it removes bias."
+  }, {
+    q_ko: "collider를 통제하면 왜 문제인가?",
+    q_en: "Why is controlling a collider a problem?",
+    a_ko: "닫혀있던 비인과 경로를 열어 가짜 상관(선택편향)을 만든다.",
+    a_en: "It opens a closed non-causal path, creating selection bias."
+  }, {
+    q_ko: "교란변수를 통제 안 하면?",
+    q_en: "What if you don't control a confounder?",
+    a_ko: "누락변수 편의(OVB)로 추정치가 왜곡된다.",
+    a_en: "Omitted-variable bias distorts the estimate."
+  }]
+}, {
+  id: "d8",
+  phase: "p1",
+  week: 7,
+  day: 14,
+  titleKo: "The Effect: 회귀 (Phase 1 마무리)",
+  titleEn: "The Effect: Regression (capstone)",
+  learnKo: "회귀를 '통계적 통제'의 도구로 재이해하고, 인과 관점에서 통제변수를 언제 넣는지 익힌다.",
+  learnEn: "Re-understand regression as statistical adjustment; learn when to include controls from a causal view.",
+  concepts: [{
+    term_ko: "통계적 보정",
+    term_en: "Statistical adjustment",
+    body_ko: "회귀에 교란변수를 통제변수로 넣어 back-door 경로를 닫는 것이다. 이렇게 하면 처치변수의 계수가 인과효과에 더 가까워진다.",
+    body_en: "Including confounders as controls to close back-door paths, bringing the treatment coefficient closer to the causal effect."
+  }, {
+    term_ko: "세테리스 파리부스",
+    term_en: "Ceteris paribus",
+    body_ko: "'다른 조건이 동일할 때'라는 뜻이다. 회귀계수는 모형 내 다른 변수를 고정한 채 해당 변수 1단위 변화의 평균 효과로 해석한다.",
+    body_en: "'Other things equal.' A coefficient is the average effect of a one-unit change, holding other model variables fixed."
+  }, {
+    term_ko: "누락변수 편의",
+    term_en: "Omitted-variable bias (OVB)",
+    body_ko: "중요한 교란변수를 빼먹으면 생기는 편향이다. 방향은 (누락변수와 X의 상관 부호)×(누락변수와 Y의 상관 부호)로 결정된다.",
+    body_en: "Bias from omitting an important confounder. Its direction = (sign of corr with X) × (sign of corr with Y)."
+  }, {
+    term_ko: "나쁜 통제",
+    term_en: "Bad control",
+    body_ko: "넣으면 오히려 편향을 만드는 통제변수다. collider나 mediator가 대표적이다. R²를 올리려고 아무 변수나 넣으면 안 되는 이유다.",
+    body_en: "A control that creates bias — typically a collider or mediator. Why you shouldn't add variables just to raise R²."
+  }],
+  tasks: [{
+    label: "The Effect Ch.13 Regression",
+    url: "https://theeffectbook.net/ch-StatisticalAdjustment.html"
+  }, {
+    label: "causaldata 패키지·package",
+    url: "https://cran.r-project.org/package=causaldata"
+  }, {
+    label: "Example repo: regression / causal memo",
+    url: "https://github.com/search?q=causal+memo+example+repository&type=repositories"
+  }],
+  outputKo: "★ Phase 1 deliverable — Quarto EDA+회귀 리포트 커밋",
+  outputEn: "★ Phase 1 deliverable — commit a Quarto EDA + regression report",
+  quiz: [{
+    q_ko: "통제변수가 인과추정에 도움 되는 경우는?",
+    q_en: "When does a control help causal estimation?",
+    a_ko: "그 변수가 교란변수일 때. back-door를 닫는다.",
+    a_en: "When it's a confounder — it closes a back-door path."
+  }, {
+    q_ko: "OVB의 방향은 무엇으로 결정되나?",
+    q_en: "What determines OVB's direction?",
+    a_ko: "누락변수와 X의 상관 부호 × 누락변수와 Y의 상관 부호.",
+    a_en: "(Sign of corr with X) × (sign of corr with Y)."
+  }, {
+    q_ko: "R²만 보고 변수를 추가하면 안 되는 이유는?",
+    q_en: "Why not add variables just to raise R²?",
+    a_ko: "인과 식별과 무관하고, bad control이면 오히려 편향을 만든다.",
+    a_en: "It's irrelevant to identification, and a bad control adds bias."
+  }]
+},
+// ═══════ PHASE 2 (PPOL 5203) ═══════
+{
+  id: "d9",
+  phase: "p2",
+  week: 8,
+  day: 15,
+  titleKo: "Python 기초 I — 자료형·제어문 (책+드릴)",
+  titleEn: "Python Basics I — Types & Control Flow (book+drills)",
+  learnKo: "강의 훑기 대신 '읽고→따라치고→문제 풀기' 루프로 전환한다. Automate the Boring Stuff 1~3장을 읽으며 모든 코드를 직접 타이핑하고, 작은 연습문제로 굳힌다.",
+  learnEn: "Switch from skimming lectures to a read→type→drill loop. Read Automate the Boring Stuff ch.1–3, typing every line yourself, then lock it in with small exercises.",
+  concepts: [{
+    term_ko: "자료형 & 변수",
+    term_en: "Types & variables",
+    body_ko: "int/float/str/bool과 변수 할당. 파이썬은 동적 타입이라 변수에 어떤 값이든 담기지만, type()으로 항상 현재 형을 확인하는 습관을 들인다.",
+    body_en: "int/float/str/bool and variable assignment. Python is dynamically typed, so a variable can hold anything — build the habit of checking type() to confirm the current type."
+  }, {
+    term_ko: "제어문",
+    term_en: "Control flow",
+    body_ko: "if/elif/else와 for/while. 들여쓰기(4칸)가 블록을 정의한다는 점이 파이썬의 핵심 문법이다. break/continue로 루프를 제어한다.",
+    body_en: "if/elif/else and for/while. Indentation (4 spaces) defines blocks — a core Python rule. Use break/continue to steer loops."
+  }, {
+    term_ko: "함수",
+    term_en: "Functions",
+    body_ko: "def로 정의하고 return으로 값을 돌려준다. 인자(argument)와 반환값을 명확히 구분하고, 반복 로직을 함수로 묶어 재사용성을 높인다.",
+    body_en: "Define with def, return a value with return. Distinguish arguments from return values, and wrap repeated logic into functions for reuse."
+  }, {
+    term_ko: "읽고-따라치기",
+    term_en: "Read-and-type loop",
+    body_ko: "책의 코드를 복붙하지 않고 직접 타이핑한다. 손으로 치는 과정에서 문법 오류를 만나고 고치며 체득되는 것이 핵심이다.",
+    body_en: "Type the book's code by hand rather than copy-pasting. The errors you hit and fix while typing are exactly where the learning sticks."
+  }],
+  tasks: [{
+    label: "Automate the Boring Stuff: ch.1–3 (무료·free)",
+    url: "https://automatetheboringstuff.com/2e/chapter1/"
+  }, {
+    label: "PPOL 5203 Week 3 (지도·map)",
+    url: "https://tiagoventura.github.io/ppol5203/weeks/week-03.html"
+  }, {
+    label: "드릴·drills: Exercism Python track",
+    url: "https://exercism.org/tracks/python"
+  }],
+  outputKo: "py-foundations repo 생성 + 1~3장 코드 직접 타이핑 + Exercism 2문제 커밋",
+  outputEn: "Create a py-foundations repo + type ch.1–3 code yourself + commit 2 Exercism solutions",
+  quiz: [{
+    q_ko: "파이썬에서 코드 블록을 정의하는 것은?",
+    q_en: "What defines a code block in Python?",
+    a_ko: "들여쓰기(보통 스페이스 4칸). 중괄호가 아니다.",
+    a_en: "Indentation (usually 4 spaces), not braces."
+  }, {
+    q_ko: "break와 continue의 차이는?",
+    q_en: "break vs continue?",
+    a_ko: "break=루프 즉시 종료, continue=이번 회차만 건너뛰고 다음으로.",
+    a_en: "break exits the loop immediately; continue skips just the current iteration."
+  }, {
+    q_ko: "책 코드를 복붙하지 않고 직접 타이핑하는 이유는?",
+    q_en: "Why type book code by hand instead of copy-pasting?",
+    a_ko: "오류를 만나고 고치는 과정에서 문법이 체득되기 때문.",
+    a_en: "Because hitting and fixing errors is where the syntax actually sticks."
+  }]
+}, {
+  id: "d10",
+  phase: "p2",
+  week: 8,
+  day: 16,
+  titleKo: "Python 기초 II — 리스트·딕셔너리·파일 (책+드릴)",
+  titleEn: "Python Basics II — Lists, Dicts, Files (book+drills)",
+  learnKo: "데이터 작업의 토대인 컬렉션 자료구조. Automate 4~6장(리스트·딕셔너리·문자열)을 읽고 직접 친 뒤, 컴프리헨션과 파일 입출력까지 드릴로 굳힌다.",
+  learnEn: "Collection data structures — the bedrock of data work. Read Automate ch.4–6 (lists, dicts, strings), type along, then drill comprehensions and file I/O.",
+  concepts: [{
+    term_ko: "리스트 & 인덱싱",
+    term_en: "Lists & indexing",
+    body_ko: "순서가 있는 가변 시퀀스. 슬라이싱(my[2:5])으로 부분을 잘라내고, 음수 인덱스로 뒤에서부터 접근한다. pandas Series의 직관적 토대가 된다.",
+    body_en: "Ordered, mutable sequences. Slice with my[2:5], use negative indices from the end. They form the intuition behind a pandas Series."
+  }, {
+    term_ko: "딕셔너리",
+    term_en: "Dictionary",
+    body_ko: "키-값 쌍의 집합. JSON·API 응답·설정값을 다루는 핵심 구조다. .get()으로 안전하게 접근하고, .items()로 순회한다.",
+    body_en: "A set of key-value pairs — the core structure for JSON, API responses, and configs. Access safely with .get(), iterate with .items()."
+  }, {
+    term_ko: "리스트 컴프리헨션",
+    term_en: "List comprehension",
+    body_ko: "[식 for x in 시퀀스 if 조건] 형태로 반복+필터를 한 줄에 표현한다. 파이썬다운 코드의 상징이자 pandas 벡터화 사고의 디딤돌이다.",
+    body_en: "[expr for x in seq if cond] expresses loop+filter in one line. A hallmark of Pythonic code and a stepping-stone to vectorized pandas thinking."
+  }, {
+    term_ko: "파일 입출력",
+    term_en: "File I/O",
+    body_ko: "with open(...) as f: 패턴으로 파일을 열고 자동으로 닫는다. CSV·텍스트를 읽고 쓰는 기본기로, 이후 pandas read_csv의 배경 이해가 된다.",
+    body_en: "Use with open(...) as f: to open and auto-close files. The basics of reading/writing CSV and text — context for pandas read_csv later."
+  }],
+  tasks: [{
+    label: "Automate the Boring Stuff: ch.4–6 (무료·free)",
+    url: "https://automatetheboringstuff.com/2e/chapter4/"
+  }, {
+    label: "PPOL 5203 Week 4 (지도·map)",
+    url: "https://tiagoventura.github.io/ppol5203/weeks/week-04.html"
+  }, {
+    label: "드릴·drills: Exercism Python track",
+    url: "https://exercism.org/tracks/python"
+  }],
+  outputKo: "리스트/딕셔너리/컴프리헨션 직접 타이핑 + Exercism 3문제 커밋",
+  outputEn: "Type lists/dicts/comprehensions yourself + commit 3 Exercism solutions",
+  quiz: [{
+    q_ko: "0~9의 짝수 제곱만 담는 컴프리헨션은?",
+    q_en: "Comprehension for squares of even numbers 0–9?",
+    a_ko: "[x**2 for x in range(10) if x%2==0]",
+    a_en: "[x**2 for x in range(10) if x%2==0]"
+  }, {
+    q_ko: "딕셔너리에서 없는 키를 안전하게 접근하려면?",
+    q_en: "How to safely access a possibly-missing dict key?",
+    a_ko: ".get('key', 기본값) — KeyError 없이 기본값을 돌려준다.",
+    a_en: ".get('key', default) — returns the default instead of raising KeyError."
+  }, {
+    q_ko: "with open(...) 패턴의 장점은?",
+    q_en: "Benefit of the with open(...) pattern?",
+    a_ko: "블록을 벗어나면 파일이 자동으로 닫혀 자원 누수를 막는다.",
+    a_en: "The file auto-closes when the block ends, preventing resource leaks."
+  }]
+}, {
+  id: "d11",
+  phase: "p2",
+  week: 9,
+  day: 17,
+  titleKo: "NumPy + pandas 입문 (McKinney 책)",
+  titleEn: "NumPy + Intro to pandas (McKinney)",
+  learnKo: "pandas 창시자 Wes McKinney의 책(무료 공개)으로 본격 데이터 작업 시작. 4~5장(NumPy·pandas 기초)을 읽고, 공식 코드 repo를 fork해 노트북을 직접 돌린다.",
+  learnEn: "Begin real data work with pandas creator Wes McKinney's free book. Read ch.4–5 (NumPy, pandas basics) and fork the official code repo to run the notebooks yourself.",
+  concepts: [{
+    term_ko: "NumPy 배열 & 벡터화",
+    term_en: "NumPy array & vectorization",
+    body_ko: "동일 타입의 고속 배열. 반복문 대신 배열 전체에 연산을 한 번에 적용(벡터화)해 빠르게 계산한다. pandas의 성능 토대다.",
+    body_en: "A fast, single-type array. Apply operations to the whole array at once (vectorization) instead of looping — the performance foundation of pandas."
+  }, {
+    term_ko: "Series & DataFrame",
+    term_en: "Series & DataFrame",
+    body_ko: "Series는 인덱스를 가진 1차원 열, DataFrame은 그 열들의 2차원 표다. R의 vector·data.frame에 각각 대응한다.",
+    body_en: "A Series is a 1-D indexed column; a DataFrame is a 2-D table of such columns — the counterparts to R's vector and data.frame."
+  }, {
+    term_ko: ".loc / .iloc",
+    term_en: ".loc / .iloc",
+    body_ko: ".loc는 라벨(이름) 기반, .iloc는 정수 위치 기반 선택이다. 둘을 혼동하면 미묘한 버그가 생기므로 명확히 구분한다.",
+    body_en: ".loc selects by label, .iloc by integer position. Confusing them causes subtle bugs, so keep them distinct."
+  }, {
+    term_ko: "fork → run → 비교",
+    term_en: "fork → run → compare",
+    body_ko: "McKinney의 공식 노트북 repo(MIT 라이선스)를 fork해 직접 실행하고, 결과를 책과 대조한다. 좋은 코드를 읽는 것 자체가 강력한 학습이다.",
+    body_en: "Fork McKinney's official notebook repo (MIT-licensed), run it yourself, and compare output to the book. Reading good code is itself powerful learning."
+  }],
+  tasks: [{
+    label: "Python for Data Analysis 3e: ch.4–5 (무료·free)",
+    url: "https://wesmckinney.com/book/"
+  }, {
+    label: "공식 코드 repo·official notebooks (fork)",
+    url: "https://github.com/wesm/pydata-book"
+  }, {
+    label: "pandas: 10 minutes to pandas (드릴·drill)",
+    url: "https://pandas.pydata.org/docs/user_guide/10min.html"
+  }],
+  outputKo: "pydata-book fork + ch.4–5 노트북 실행 + '10 minutes to pandas' 따라치기",
+  outputEn: "Fork pydata-book + run ch.4–5 notebooks + work through '10 minutes to pandas'",
+  quiz: [{
+    q_ko: "라벨 기반 / 정수 위치 기반 선택 메서드는?",
+    q_en: "Label-based vs position-based selection?",
+    a_ko: ".loc[] / .iloc[]",
+    a_en: ".loc[] / .iloc[]"
+  }, {
+    q_ko: "벡터화가 반복문보다 빠른 이유는?",
+    q_en: "Why is vectorization faster than a loop?",
+    a_ko: "배열 전체에 최적화된 저수준 연산을 한 번에 적용하기 때문.",
+    a_en: "It applies optimized low-level operations to the whole array at once."
+  }, {
+    q_ko: "Series와 DataFrame의 관계는?",
+    q_en: "Relationship between Series and DataFrame?",
+    a_ko: "DataFrame의 각 열이 Series. DataFrame=여러 Series의 모음.",
+    a_en: "Each DataFrame column is a Series; a DataFrame is a collection of them."
+  }]
+}, {
+  id: "d12",
+  phase: "p2",
+  week: 9,
+  day: 18,
+  titleKo: "pandas 데이터 정제 (McKinney ch.7)",
+  titleEn: "pandas Data Cleaning (McKinney ch.7)",
+  learnKo: "실무 데이터의 80%는 정제다. McKinney 7장(결측·중복·형변환·매핑)을 읽고 직접 친 뒤, 지저분한 공개 CSV 하나를 골라 처음부터 끝까지 정제한다.",
+  learnEn: "80% of real data work is cleaning. Read McKinney ch.7 (missing, duplicates, casting, mapping), type along, then clean one messy public CSV end-to-end.",
+  concepts: [{
+    term_ko: "결측 처리",
+    term_en: "Missing data",
+    body_ko: "isna()로 탐지하고 dropna()로 제거하거나 fillna()로 채운다. 채울지 버릴지는 결측이 '왜' 생겼는지에 달렸다 — 무작위 결측과 체계적 결측을 구분한다.",
+    body_en: "Detect with isna(), then dropna() or fillna(). Whether to drop or fill depends on why the data is missing — distinguish random from systematic missingness."
+  }, {
+    term_ko: "중복 처리",
+    term_en: "Duplicates",
+    body_ko: "duplicated()로 찾고 drop_duplicates()로 제거한다. 어떤 열 조합이 '같은 관측치'를 정의하는지 먼저 정해야 한다.",
+    body_en: "Find with duplicated(), remove with drop_duplicates(). First decide which column combination defines 'the same observation.'"
+  }, {
+    term_ko: "형변환 & 매핑",
+    term_en: "Casting & mapping",
+    body_ko: "astype()로 형을 바꾸고, map()/replace()로 값을 치환한다. 문자열로 잘못 읽힌 숫자나 코드값을 라벨로 바꾸는 작업에 필수다.",
+    body_en: "Change types with astype(); substitute values with map()/replace(). Essential for fixing numbers read as strings or turning codes into labels."
+  }, {
+    term_ko: "재현가능 정제",
+    term_en: "Reproducible cleaning",
+    body_ko: "정제 단계를 스크립트/노트북에 순서대로 기록해, 원본에서 같은 결과를 항상 재현할 수 있게 한다. 연구·분석 신뢰의 기본이다.",
+    body_en: "Record cleaning steps in order in a script/notebook so the same result is always reproducible from the raw data — a baseline of analytical trust."
+  }],
+  tasks: [{
+    label: "Python for Data Analysis 3e: ch.7 (무료·free)",
+    url: "https://wesmckinney.com/book/data-cleaning"
+  }, {
+    label: "공개 데이터·data: Our World in Data",
+    url: "https://ourworldindata.org/"
+  }, {
+    label: "pandas: Working with missing data (드릴·drill)",
+    url: "https://pandas.pydata.org/docs/user_guide/missing_data.html"
+  }],
+  outputKo: "지저분한 공개 CSV 1개를 처음부터 끝까지 정제하는 재현가능 노트북",
+  outputEn: "A reproducible notebook cleaning one messy public CSV end-to-end",
+  quiz: [{
+    q_ko: "결측을 채울지 버릴지는 무엇에 달렸나?",
+    q_en: "What decides whether to fill or drop missing data?",
+    a_ko: "결측이 '왜' 생겼는지 — 무작위면 제거/단순대치, 체계적이면 신중히 다뤄야 편향을 피한다.",
+    a_en: "Why it's missing — random allows dropping/simple imputation; systematic needs care to avoid bias."
+  }, {
+    q_ko: "중복 제거 전에 먼저 정해야 할 것은?",
+    q_en: "What to decide before removing duplicates?",
+    a_ko: "어떤 열 조합이 '동일 관측치'를 정의하는지.",
+    a_en: "Which column combination defines 'the same observation.'"
+  }, {
+    q_ko: "정제 단계를 노트북에 순서대로 남기는 이유는?",
+    q_en: "Why record cleaning steps in order?",
+    a_ko: "원본에서 같은 결과를 항상 재현할 수 있어 신뢰성이 보장된다.",
+    a_en: "So the same result is always reproducible from raw data, ensuring trust."
+  }]
+}, {
+  id: "d13",
+  phase: "p2",
+  week: 10,
+  day: 19,
+  titleKo: "pandas 집계·결합·재구조화 (McKinney ch.8,10)",
+  titleEn: "pandas groupby, Join, Reshape (McKinney ch.8,10)",
+  learnKo: "분석의 심장인 groupby와 결합. McKinney 8장(merge·concat·reshape)과 10장(groupby·집계)을 읽고, R dplyr에서 하던 작업을 pandas로 재현한다.",
+  learnEn: "groupby and joins — the heart of analysis. Read McKinney ch.8 (merge, concat, reshape) and ch.10 (groupby, aggregation), reproducing your R dplyr work in pandas.",
+  concepts: [{
+    term_ko: "groupby → 집계",
+    term_en: "groupby → aggregate",
+    body_ko: "df.groupby('키').agg(...)로 그룹별 평균·합계·개수를 계산한다. R의 group_by()+summarize()와 같은 'split-apply-combine' 패턴이다.",
+    body_en: "df.groupby('key').agg(...) computes per-group mean/sum/count — the same split-apply-combine pattern as R's group_by()+summarize()."
+  }, {
+    term_ko: "merge (조인)",
+    term_en: "merge (join)",
+    body_ko: "pd.merge로 키 기반 결합. how='left'/'inner'/'outer'로 조인 방식을 정한다. 키 중복이 있으면 행이 곱해지니 결합 전후 행 수를 항상 확인한다.",
+    body_en: "pd.merge joins on a key; how='left'/'inner'/'outer' sets the type. Duplicate keys multiply rows, so always check row counts before and after."
+  }, {
+    term_ko: "concat",
+    term_en: "concat",
+    body_ko: "pd.concat은 축 방향으로 단순히 이어 붙인다(행 쌓기 또는 열 붙이기). 키 기반 결합인 merge와 목적이 다르다.",
+    body_en: "pd.concat stacks along an axis (rows or columns), distinct in purpose from key-based merge."
+  }, {
+    term_ko: "pivot / melt",
+    term_en: "pivot / melt",
+    body_ko: "melt는 wide→long, pivot은 long→wide. tidy 형태(변수=열, 관측치=행)로 바꿔 분석·시각화하기 좋게 만든다.",
+    body_en: "melt goes wide→long, pivot goes long→wide. Reshape into tidy form (variable=column, observation=row) for analysis and plotting."
+  }],
+  tasks: [{
+    label: "Python for Data Analysis 3e: ch.8 & ch.10 (무료·free)",
+    url: "https://wesmckinney.com/book/data-wrangling"
+  }, {
+    label: "공식 노트북·notebooks (ch.8,10)",
+    url: "https://github.com/wesm/pydata-book"
+  }, {
+    label: "pandas: Group by split-apply-combine (드릴·drill)",
+    url: "https://pandas.pydata.org/docs/user_guide/groupby.html"
+  }],
+  outputKo: "공개 데이터로 groupby+merge 분석 노트북 (R dplyr 버전과 결과 대조)",
+  outputEn: "A groupby+merge analysis notebook (compare results to the R dplyr version)",
+  quiz: [{
+    q_ko: "R group_by()+summarize()의 pandas 대응은?",
+    q_en: "pandas equivalent of group_by()+summarize()?",
+    a_ko: "df.groupby('키').agg(...) — split-apply-combine.",
+    a_en: "df.groupby('key').agg(...) — split-apply-combine."
+  }, {
+    q_ko: "merge 전후로 꼭 확인할 것은?",
+    q_en: "What to check around a merge?",
+    a_ko: "행 수. 키 중복이 있으면 의도치 않게 행이 곱해진다(fan-out).",
+    a_en: "Row counts. Duplicate keys can unintentionally multiply rows (fan-out)."
+  }, {
+    q_ko: "melt와 pivot의 방향은?",
+    q_en: "Direction of melt vs pivot?",
+    a_ko: "melt=wide→long, pivot=long→wide.",
+    a_en: "melt = wide→long; pivot = long→wide."
+  }]
+}, {
+  id: "d14",
+  phase: "p2",
+  week: 10,
+  day: 20,
+  titleKo: "시각화 (McKinney ch.9 + seaborn)",
+  titleEn: "Visualization (McKinney ch.9 + seaborn)",
+  learnKo: "숫자를 설득으로 바꾸는 시각화. McKinney 9장(matplotlib·pandas plotting)과 seaborn 공식 튜토리얼로 통계 그래프를 만들고, ggplot2 경험과 연결한다.",
+  learnEn: "Visualization turns numbers into persuasion. Use McKinney ch.9 (matplotlib, pandas plotting) and the seaborn tutorial to build statistical graphics, linking to your ggplot2 experience.",
+  concepts: [{
+    term_ko: "matplotlib 기본",
+    term_en: "matplotlib basics",
+    body_ko: "Python 시각화의 토대 라이브러리. Figure와 Axes 개념을 이해하면 세밀한 제어가 가능하다. 대부분의 다른 도구가 이 위에 얹힌다.",
+    body_en: "The foundational Python plotting library. Grasping Figure and Axes unlocks fine control; most other tools build on it."
+  }, {
+    term_ko: "seaborn",
+    term_en: "seaborn",
+    body_ko: "matplotlib 위에서 통계 그래프를 간결하게 그린다. ggplot2와 사고방식이 비슷해 R 사용자가 빠르게 적응한다(분포·관계·범주형 플롯).",
+    body_en: "Concise statistical graphics on top of matplotlib. Its mindset resembles ggplot2, so R users adapt fast (distribution, relational, categorical plots)."
+  }, {
+    term_ko: "pandas .plot()",
+    term_en: "pandas .plot()",
+    body_ko: "DataFrame에서 바로 .plot()을 호출해 빠르게 탐색용 그래프를 만든다. EDA 단계의 즉석 시각화에 유용하다.",
+    body_en: "Call .plot() directly on a DataFrame for quick exploratory charts — handy for on-the-fly EDA visuals."
+  }, {
+    term_ko: "전달을 위한 디자인",
+    term_en: "Design for communication",
+    body_ko: "명확한 제목·축라벨·범례, 불필요한 요소 제거. 분석가의 결과가 의사결정으로 이어지려면 그래프가 스스로 설명해야 한다.",
+    body_en: "Clear titles, axis labels, legends; remove clutter. For an analyst's results to drive decisions, a chart must explain itself."
+  }],
+  tasks: [{
+    label: "Python for Data Analysis 3e: ch.9 (무료·free)",
+    url: "https://wesmckinney.com/book/plotting-and-visualization"
+  }, {
+    label: "seaborn 공식 튜토리얼·tutorial (무료·free)",
+    url: "https://seaborn.pydata.org/tutorial.html"
+  }, {
+    label: "PPOL 5203 Week 7 (지도·map)",
+    url: "https://tiagoventura.github.io/ppol5203/weeks/week-07.html"
+  }],
+  outputKo: "한 데이터셋으로 matplotlib+seaborn 그래프 4종 + 전달용으로 다듬기",
+  outputEn: "Four matplotlib+seaborn charts on one dataset + polish them for communication",
+  quiz: [{
+    q_ko: "matplotlib의 Figure와 Axes 차이는?",
+    q_en: "Figure vs Axes in matplotlib?",
+    a_ko: "Figure=전체 캔버스, Axes=그 안의 개별 플롯(좌표축 영역).",
+    a_en: "Figure = the whole canvas; Axes = an individual plot (the coordinate area) within it."
+  }, {
+    q_ko: "seaborn이 R 사용자에게 친숙한 이유는?",
+    q_en: "Why is seaborn familiar to R users?",
+    a_ko: "ggplot2처럼 통계 그래프를 간결한 문법으로 그려서.",
+    a_en: "It draws statistical plots concisely, much like ggplot2."
+  }, {
+    q_ko: "전달용 그래프가 갖춰야 할 기본은?",
+    q_en: "Essentials of a communication-ready chart?",
+    a_ko: "명확한 제목·축라벨·범례 + 불필요한 요소 제거(스스로 설명되게).",
+    a_en: "Clear title/axis labels/legend + remove clutter, so it explains itself."
+  }]
+}, {
+  id: "d15",
+  phase: "p2",
+  week: 11,
+  day: 21,
+  titleKo: "SQL I — SELECT·WHERE·정렬 (SQLBolt+드릴)",
+  titleEn: "SQL I — SELECT, WHERE, Sorting (SQLBolt+drills)",
+  learnKo: "SQL은 '읽기'보다 '매일 풀기'로 는다. SQLBolt 1~6과로 기본 문법을 읽고, 곧장 pgexercises의 Basic 문제를 풀어 손에 익힌다.",
+  learnEn: "SQL grows by daily solving, not reading. Read SQLBolt lessons 1–6 for syntax, then immediately solve pgexercises Basic problems to build muscle memory.",
+  concepts: [{
+    term_ko: "SELECT / FROM / WHERE",
+    term_en: "SELECT / FROM / WHERE",
+    body_ko: "가져올 열(SELECT), 출처 테이블(FROM), 행 조건(WHERE). 모든 쿼리의 뼈대다. WHERE에 AND/OR/IN/LIKE를 조합한다.",
+    body_en: "Columns to return (SELECT), source table (FROM), row condition (WHERE) — the skeleton of every query. Combine AND/OR/IN/LIKE in WHERE."
+  }, {
+    term_ko: "ORDER BY / LIMIT",
+    term_en: "ORDER BY / LIMIT",
+    body_ko: "결과를 정렬(ORDER BY)하고 상위 N개만 자른다(LIMIT). ASC/DESC로 방향을 정한다. '상위 10개 고객' 같은 질문의 기본 도구다.",
+    body_en: "Sort results (ORDER BY) and take the top N (LIMIT); ASC/DESC sets direction. The basic tool for 'top 10 customers' questions."
+  }, {
+    term_ko: "DISTINCT",
+    term_en: "DISTINCT",
+    body_ko: "중복을 제거해 고유값만 반환한다. '몇 개의 서로 다른 국가가 있나' 같은 질문에 쓴다.",
+    body_en: "Returns unique values by removing duplicates — for questions like 'how many distinct countries.'"
+  }, {
+    term_ko: "매일 드릴",
+    term_en: "Daily drill",
+    body_ko: "읽기는 짧게, 문제는 매일 푼다. pgexercises Basic을 오늘 다 풀고, 틀린 문제는 풀이를 적어 repo에 커밋한다.",
+    body_en: "Keep reading short, solve daily. Finish pgexercises Basic today and commit write-ups of any you missed to a repo."
+  }],
+  tasks: [{
+    label: "SQLBolt: Lessons 1–6 (무료·free)",
+    url: "https://sqlbolt.com/"
+  }, {
+    label: "pgexercises: Basic (드릴·drill)",
+    url: "https://pgexercises.com/questions/basic/"
+  }, {
+    label: "DataLemur: Easy SQL (드릴·drill)",
+    url: "https://datalemur.com/questions?category=SQL"
+  }],
+  outputKo: "sql-practice repo 생성 + pgexercises Basic 완료 + 풀이 커밋",
+  outputEn: "Create a sql-practice repo + finish pgexercises Basic + commit solutions",
+  quiz: [{
+    q_ko: "중복을 제거하고 고유값만 반환하는 키워드는?",
+    q_en: "Keyword that returns only unique values?",
+    a_ko: "DISTINCT",
+    a_en: "DISTINCT"
+  }, {
+    q_ko: "'상위 10개'를 가져오는 절은?",
+    q_en: "Clause to get the 'top 10'?",
+    a_ko: "ORDER BY ... DESC 후 LIMIT 10.",
+    a_en: "ORDER BY ... DESC then LIMIT 10."
+  }, {
+    q_ko: "WHERE에서 여러 값 중 하나와 일치를 검사하려면?",
+    q_en: "How to test membership in a set of values in WHERE?",
+    a_ko: "IN (...) 예: WHERE country IN ('KR','US').",
+    a_en: "IN (...), e.g., WHERE country IN ('KR','US')."
+  }]
+}, {
+  id: "d16",
+  phase: "p2",
+  week: 12,
+  day: 22,
+  titleKo: "SQL II — 집계·GROUP BY·HAVING (드릴 집중)",
+  titleEn: "SQL II — Aggregation, GROUP BY, HAVING (drill-heavy)",
+  learnKo: "데이터 분석 SQL의 핵심인 집계. SQLBolt 7~9과로 GROUP BY·집계함수를 읽고, pgexercises Aggregate 문제를 집중적으로 푼다.",
+  learnEn: "Aggregation — the core of analytics SQL. Read SQLBolt 7–9 for GROUP BY and aggregate functions, then drill the pgexercises Aggregate set hard.",
+  concepts: [{
+    term_ko: "집계함수",
+    term_en: "Aggregate functions",
+    body_ko: "COUNT·SUM·AVG·MIN·MAX로 여러 행을 하나의 값으로 요약한다. 분석 질문 대부분이 결국 '그룹별 집계'로 귀결된다.",
+    body_en: "COUNT, SUM, AVG, MIN, MAX collapse many rows into one value. Most analytics questions reduce to 'aggregate by group.'"
+  }, {
+    term_ko: "GROUP BY",
+    term_en: "GROUP BY",
+    body_ko: "행을 그룹으로 묶어 그룹마다 집계를 적용한다. SELECT의 비집계 열은 반드시 GROUP BY에 들어가야 한다.",
+    body_en: "Buckets rows into groups and applies aggregation per group. Any non-aggregated SELECT column must appear in GROUP BY."
+  }, {
+    term_ko: "HAVING vs WHERE",
+    term_en: "HAVING vs WHERE",
+    body_ko: "WHERE는 집계 '전' 행을 거르고, HAVING은 집계 '후' 그룹을 거른다. '평균이 100 이상인 그룹'은 HAVING으로 거른다.",
+    body_en: "WHERE filters rows before aggregation; HAVING filters groups after. 'Groups whose average ≥ 100' is a HAVING filter."
+  }, {
+    term_ko: "실행 순서",
+    term_en: "Logical execution order",
+    body_ko: "FROM→WHERE→GROUP BY→HAVING→SELECT→ORDER BY. 이 순서를 알면 별칭(alias)을 어디서 쓸 수 있는지, 왜 WHERE에 집계를 못 쓰는지 이해된다.",
+    body_en: "FROM→WHERE→GROUP BY→HAVING→SELECT→ORDER BY. Knowing this explains where aliases work and why aggregates can't go in WHERE."
+  }],
+  tasks: [{
+    label: "SQLBolt: Lessons 7–9 (무료·free)",
+    url: "https://sqlbolt.com/"
+  }, {
+    label: "pgexercises: Aggregates (드릴·drill)",
+    url: "https://pgexercises.com/questions/aggregates/"
+  }, {
+    label: "Mode SQL: Aggregate functions (참고·ref)",
+    url: "https://mode.com/sql-tutorial/sql-aggregate-functions/"
+  }],
+  outputKo: "pgexercises Aggregate 완료 + '실행 순서'를 직접 정리한 노트",
+  outputEn: "Finish pgexercises Aggregates + your own note on logical execution order",
+  quiz: [{
+    q_ko: "WHERE와 HAVING의 차이는?",
+    q_en: "WHERE vs HAVING?",
+    a_ko: "WHERE=집계 전 행 필터, HAVING=집계 후 그룹 필터.",
+    a_en: "WHERE filters rows before aggregation; HAVING filters groups after."
+  }, {
+    q_ko: "SQL의 논리적 실행 순서는?",
+    q_en: "SQL's logical execution order?",
+    a_ko: "FROM→WHERE→GROUP BY→HAVING→SELECT→ORDER BY.",
+    a_en: "FROM→WHERE→GROUP BY→HAVING→SELECT→ORDER BY."
+  }, {
+    q_ko: "왜 WHERE 절에는 집계함수를 쓸 수 없나?",
+    q_en: "Why can't aggregates go in WHERE?",
+    a_ko: "WHERE는 집계(GROUP BY) 이전 단계라 그룹 결과가 아직 없기 때문. HAVING을 쓴다.",
+    a_en: "WHERE runs before aggregation, so group results don't exist yet. Use HAVING."
+  }]
+}, {
+  id: "d17",
+  phase: "p2",
+  week: 12,
+  day: 23,
+  titleKo: "SQL III — JOIN (드릴 집중)",
+  titleEn: "SQL III — JOINs (drill-heavy)",
+  learnKo: "여러 테이블을 잇는 JOIN은 실무 SQL의 80%다. SQLBolt 조인 과를 읽고, pgexercises Join 문제를 집중적으로 풀어 INNER/LEFT/self-join을 손에 익힌다.",
+  learnEn: "JOINs tie tables together — 80% of real SQL. Read SQLBolt's join lessons, then drill the pgexercises Join set to internalize INNER/LEFT/self-joins.",
+  concepts: [{
+    term_ko: "INNER JOIN",
+    term_en: "INNER JOIN",
+    body_ko: "두 테이블에서 키가 양쪽 모두 매칭되는 행만 반환한다. 가장 흔한 조인이며 '둘 다 존재하는 것'을 찾을 때 쓴다.",
+    body_en: "Returns only rows where the key matches in both tables — the most common join, for finding 'what exists in both.'"
+  }, {
+    term_ko: "LEFT JOIN",
+    term_en: "LEFT JOIN",
+    body_ko: "왼쪽 테이블의 모든 행을 유지하고, 매칭이 없으면 오른쪽을 NULL로 채운다. '주문이 없는 고객'처럼 누락을 찾을 때 핵심이다.",
+    body_en: "Keeps all left-table rows, filling NULL where the right has no match. Key for finding gaps, like 'customers with no orders.'"
+  }, {
+    term_ko: "self-join",
+    term_en: "Self-join",
+    body_ko: "같은 테이블을 자기 자신과 조인한다. 직원-매니저, 같은 그룹 내 비교처럼 한 테이블 안에서 행끼리 연결할 때 쓴다.",
+    body_en: "Joins a table to itself — for employee-manager links or within-group comparisons that connect rows in one table."
+  }, {
+    term_ko: "조인 키 위생",
+    term_en: "Join-key hygiene",
+    body_ko: "조인 전 키의 중복·결측·형 불일치를 점검한다. 키가 중복이면 행이 곱해지고(fan-out), 형이 다르면 조용히 매칭에 실패한다.",
+    body_en: "Before joining, check keys for duplicates, nulls, and type mismatches. Duplicate keys fan out rows; mismatched types silently fail to match."
+  }],
+  tasks: [{
+    label: "SQLBolt: JOIN lessons (무료·free)",
+    url: "https://sqlbolt.com/lesson/select_queries_with_joins"
+  }, {
+    label: "pgexercises: Joins and subqueries (드릴·drill)",
+    url: "https://pgexercises.com/questions/joins/"
+  }, {
+    label: "DataLemur: Medium SQL (드릴·drill)",
+    url: "https://datalemur.com/questions?category=SQL"
+  }],
+  outputKo: "pgexercises Join 완료 + LEFT JOIN으로 '누락 찾기' 쿼리 1개 커밋",
+  outputEn: "Finish pgexercises Joins + commit one LEFT JOIN 'find the gap' query",
+  quiz: [{
+    q_ko: "INNER JOIN과 LEFT JOIN의 차이는?",
+    q_en: "INNER vs LEFT JOIN?",
+    a_ko: "INNER=양쪽 매칭만, LEFT=왼쪽 전체 유지(매칭 없으면 NULL).",
+    a_en: "INNER = matched on both; LEFT = keep all left rows (NULL where unmatched)."
+  }, {
+    q_ko: "'주문이 없는 고객'을 찾는 조인 전략은?",
+    q_en: "Join strategy to find 'customers with no orders'?",
+    a_ko: "LEFT JOIN 후 오른쪽 키가 NULL인 행을 거른다.",
+    a_en: "LEFT JOIN, then filter rows where the right key IS NULL."
+  }, {
+    q_ko: "조인 키가 중복이면 무슨 일이?",
+    q_en: "What happens if join keys are duplicated?",
+    a_ko: "행이 곱해져(fan-out) 결과가 의도치 않게 불어난다.",
+    a_en: "Rows fan out, unintentionally inflating the result."
+  }]
+}, {
+  id: "d18",
+  phase: "p2",
+  week: 13,
+  day: 24,
+  titleKo: "SQL IV — 서브쿼리·CTE·윈도우 함수 ★ (면접 핵심)",
+  titleEn: "SQL IV — Subqueries, CTEs, Window Functions ★ (interview core)",
+  learnKo: "분석·면접에서 갈리는 고급 SQL. Mode의 고급 튜토리얼로 윈도우 함수를 읽고, DataLemur Medium/Hard와 LeetCode SQL 50으로 실전 문제를 푼다.",
+  learnEn: "The advanced SQL that separates analysts in interviews. Read Mode's advanced tutorial for window functions, then solve DataLemur Medium/Hard and LeetCode SQL 50.",
+  concepts: [{
+    term_ko: "서브쿼리",
+    term_en: "Subquery",
+    body_ko: "쿼리 안의 쿼리. WHERE나 FROM 안에 중첩해 단계적으로 계산한다. '평균보다 큰 행' 같은 조건에 쓴다.",
+    body_en: "A query within a query, nested in WHERE or FROM for stepwise computation — used for conditions like 'rows above the average.'"
+  }, {
+    term_ko: "CTE (WITH 절)",
+    term_en: "CTE (WITH clause)",
+    body_ko: "복잡한 쿼리를 이름 붙은 임시 결과셋으로 단계화한다. 가독성이 크게 오르고, 윈도우 함수 결과를 다시 필터할 때 필수다.",
+    body_en: "Breaks a complex query into named temporary result sets. It boosts readability and is essential for filtering window-function output."
+  }, {
+    term_ko: "윈도우 함수",
+    term_en: "Window function",
+    body_ko: "행을 줄이지 않고 순위·누적·이동평균을 계산한다. ROW_NUMBER/RANK/DENSE_RANK, LAG/LEAD가 면접 최빈출이다.",
+    body_en: "Computes ranks, running totals, moving averages without collapsing rows. ROW_NUMBER/RANK/DENSE_RANK and LAG/LEAD are top interview topics."
+  }, {
+    term_ko: "PARTITION BY",
+    term_en: "PARTITION BY",
+    body_ko: "윈도우 함수를 그룹별로 적용한다. '부서별 급여 순위'처럼 그룹 내에서 순위를 매길 때 쓴다.",
+    body_en: "Applies a window function per group — for ranking within groups, like 'salary rank within each department.'"
+  }],
+  tasks: [{
+    label: "Mode SQL: Advanced (윈도우 함수·free)",
+    url: "https://mode.com/sql-tutorial/sql-window-functions/"
+  }, {
+    label: "DataLemur: Medium & Hard (드릴·drill)",
+    url: "https://datalemur.com/questions?category=SQL"
+  }, {
+    label: "LeetCode: Top SQL 50 (드릴·drill)",
+    url: "https://leetcode.com/studyplan/top-sql-50/"
+  }],
+  outputKo: "★ 윈도우 함수로 '그룹별 top-N' 쿼리 + DataLemur Medium 5문제 커밋 → sql-practice repo",
+  outputEn: "★ A 'top-N per group' window query + 5 DataLemur Medium solutions → sql-practice repo",
+  quiz: [{
+    q_ko: "ROW_NUMBER / RANK / DENSE_RANK의 차이는?",
+    q_en: "ROW_NUMBER vs RANK vs DENSE_RANK?",
+    a_ko: "ROW_NUMBER=동점도 다른 번호, RANK=동점 같은 순위+건너뜀(1,1,3), DENSE_RANK=안 건너뜀(1,1,2).",
+    a_en: "ROW_NUMBER: distinct even on ties; RANK: ties share rank then skip (1,1,3); DENSE_RANK: no skip (1,1,2)."
+  }, {
+    q_ko: "'부서별 급여 1위'를 구하는 패턴은?",
+    q_en: "Pattern for 'top salary per department'?",
+    a_ko: "RANK() OVER (PARTITION BY dept ORDER BY salary DESC) 후 rank=1 필터.",
+    a_en: "RANK() OVER (PARTITION BY dept ORDER BY salary DESC), then filter rank=1."
+  }, {
+    q_ko: "윈도우 함수 결과를 다시 필터하려면 왜 CTE가 필요한가?",
+    q_en: "Why need a CTE to filter window-function output?",
+    a_ko: "윈도우는 SELECT 단계라 WHERE에서 못 거른다. CTE/서브쿼리로 감싼 뒤 바깥에서 필터한다.",
+    a_en: "Windows compute at SELECT, so WHERE can't filter them. Wrap in a CTE/subquery and filter outside."
+  }]
+}, {
+  id: "d18b",
+  phase: "p2",
+  week: 13,
+  day: 25,
+  titleKo: "데이터 수집 — API·웹스크래핑 ★ (오픈소스 활용)",
+  titleEn: "Data Collection — APIs & Scraping ★ (open source)",
+  learnKo: "분석은 데이터 확보부터다. requests로 API를 호출하고 BeautifulSoup으로 스크래핑한다. World Bank 등 공개 API의 오픈소스 클라이언트를 fork해 직접 돌려본다.",
+  learnEn: "Analysis starts with getting data. Call APIs with requests and scrape with BeautifulSoup. Fork an open-source client for a public API (e.g., World Bank) and run it yourself.",
+  concepts: [{
+    term_ko: "REST API & JSON",
+    term_en: "REST API & JSON",
+    body_ko: "requests.get(url)로 데이터를 받아 .json()으로 파싱한다. 응답은 보통 키-값 중첩(JSON)이라 파이썬 딕셔너리로 자연스럽게 변환된다.",
+    body_en: "requests.get(url) fetches data, .json() parses it. Responses are usually nested key-value (JSON), mapping naturally to a Python dict."
+  }, {
+    term_ko: "웹 스크래핑",
+    term_en: "Web scraping",
+    body_ko: "BeautifulSoup으로 HTML을 파싱해 원하는 요소를 추출한다. robots.txt와 이용약관을 존중하고, 가능하면 API를 우선한다.",
+    body_en: "Parse HTML with BeautifulSoup to extract elements. Respect robots.txt and terms of service, and prefer an API when one exists."
+  }, {
+    term_ko: "페이지네이션 & 레이트리밋",
+    term_en: "Pagination & rate limits",
+    body_ko: "API는 결과를 페이지로 나눠 주고 호출 빈도를 제한한다. 반복 호출 사이에 대기(time.sleep)를 두고 페이지를 순회한다.",
+    body_en: "APIs page their results and cap call frequency. Loop over pages and add waits (time.sleep) between calls."
+  }, {
+    term_ko: "오픈소스 클라이언트 활용",
+    term_en: "Reuse an OSS client",
+    body_ko: "바퀴를 다시 만들지 말 것. wbgapi 같은 검증된 오픈소스 클라이언트를 fork해 구조를 읽고, 내 목적에 맞게 adapt한다.",
+    body_en: "Don't reinvent the wheel. Fork a proven OSS client like wbgapi, read its structure, and adapt it to your purpose."
+  }],
+  tasks: [{
+    label: "Automate the Boring Stuff: ch.12 Web Scraping (무료·free)",
+    url: "https://automatetheboringstuff.com/2e/chapter12/"
+  }, {
+    label: "wbgapi: World Bank API client (오픈소스·fork)",
+    url: "https://github.com/tgherzog/wbgapi"
+  }, {
+    label: "Real Python: API integration (참고·ref)",
+    url: "https://realpython.com/api-integration-in-python/"
+  }],
+  outputKo: "★ 공개 API에서 데이터 수집→정제→저장하는 재현가능 스크립트 → data-collection repo",
+  outputEn: "★ A reproducible script to pull→clean→store data from a public API → data-collection repo",
+  quiz: [{
+    q_ko: "API 응답(JSON)을 파이썬에서 어떻게 다루나?",
+    q_en: "How do you handle a JSON API response in Python?",
+    a_ko: "requests로 받아 .json()으로 파싱 → 딕셔너리/리스트로 다룬다.",
+    a_en: "Fetch with requests, parse with .json() → handle as dict/list."
+  }, {
+    q_ko: "스크래핑보다 API를 우선하는 이유는?",
+    q_en: "Why prefer an API over scraping?",
+    a_ko: "더 안정적·합법적이고 구조화된 데이터를 직접 주기 때문.",
+    a_en: "It's more stable, legitimate, and returns structured data directly."
+  }, {
+    q_ko: "많은 데이터를 페이지로 받을 때 주의할 점은?",
+    q_en: "What to watch when fetching paginated data?",
+    a_ko: "페이지를 순회하고 레이트리밋을 지켜 호출 사이에 대기를 둔다.",
+    a_en: "Loop through pages and respect rate limits with waits between calls."
+  }]
+}, {
+  id: "d18c",
+  phase: "p2",
+  week: 14,
+  day: 26,
+  titleKo: "Python 계량 — statsmodels로 회귀 재현 ★",
+  titleEn: "Python Econometrics — Replicate Regressions in statsmodels ★",
+  learnKo: "R에서 한 회귀를 Python(statsmodels)으로 똑같이 재현해 결과 일치를 확인한다. '도구에 독립적인' 분석가가 되는 훈련이자 Python 실무를 증명하는 산출물. Phase 2 마무리.",
+  learnEn: "Reproduce an R regression in Python (statsmodels) and confirm the results match. Training to be a tool-independent analyst and a Python artifact to show. Phase 2 capstone.",
+  concepts: [{
+    term_ko: "statsmodels",
+    term_en: "statsmodels",
+    body_ko: "Python의 통계·계량 라이브러리. R 스타일 공식(y ~ x1 + x2)을 지원해 OLS·로짓·프로빗을 익숙한 문법으로 돌리고, 계수·표준오차·검정을 표로 준다.",
+    body_en: "Python's stats/econometrics library. R-style formulas (y ~ x1 + x2) run OLS/logit/probit in familiar syntax, returning coefficients, SEs, and tests in a table."
+  }, {
+    term_ko: "공식 API",
+    term_en: "Formula API (smf.ols)",
+    body_ko: "smf.ols('y ~ x1 + x2', data=df).fit()로 적합한다. R의 lm()과 사고방식이 거의 같아 R 사용자가 빠르게 옮겨온다.",
+    body_en: "Fit with smf.ols('y ~ x1 + x2', data=df).fit(). The mental model nearly matches R's lm(), so R users transfer quickly."
+  }, {
+    term_ko: "로버스트 표준오차",
+    term_en: "Robust standard errors",
+    body_ko: ".fit(cov_type='HC1')로 이분산 강건 표준오차를 쓴다. 계수는 그대로지만 추론(표준오차·유의성)이 올바르게 교정된다.",
+    body_en: "Use .fit(cov_type='HC1') for heteroskedasticity-robust SEs. Coefficients stay the same; inference (SEs, significance) is corrected."
+  }, {
+    term_ko: "교차검증(도구 독립성)",
+    term_en: "Cross-checking (tool independence)",
+    body_ko: "같은 데이터·모형이면 R lm()과 statsmodels 계수가 일치해야 한다. 불일치는 변수 코딩·결측 처리·표본 차이를 의심하라는 신호다.",
+    body_en: "With the same data and model, R lm() and statsmodels coefficients must match. A mismatch flags coding, missing-data, or sample differences."
+  }],
+  tasks: [{
+    label: "statsmodels: OLS & formula API (docs·무료)",
+    url: "https://www.statsmodels.org/stable/regression.html"
+  }, {
+    label: "statsmodels: example notebooks (오픈소스·fork)",
+    url: "https://github.com/statsmodels/statsmodels/tree/main/examples"
+  }, {
+    label: "Causal Inference for the Brave and True (무료·free)",
+    url: "https://matheusfacure.github.io/python-causality-handbook/"
+  }],
+  outputKo: "★ Phase 2 deliverable — R 회귀를 Python으로 재현해 계수 일치 확인 (R↔Python 나란히) 노트북 → 포트폴리오",
+  outputEn: "★ Phase 2 deliverable — a notebook reproducing an R regression in Python with matching coefficients (R↔Python side by side) → portfolio",
+  quiz: [{
+    q_ko: "R 스타일 공식으로 OLS를 돌리는 statsmodels API는?",
+    q_en: "Which statsmodels API runs OLS with an R-style formula?",
+    a_ko: "smf.ols('y ~ x1 + x2', data=df).fit()",
+    a_en: "smf.ols('y ~ x1 + x2', data=df).fit()"
+  }, {
+    q_ko: "R lm()과 statsmodels 계수가 달라야 정상인가?",
+    q_en: "Should R lm() and statsmodels coefficients differ?",
+    a_ko: "아니다. 같은 데이터·모형이면 일치해야 한다. 다르면 코딩/결측/표본 차이를 의심한다.",
+    a_en: "No. With the same data/model they must match; a difference signals coding, missing-data, or sample issues."
+  }, {
+    q_ko: "이분산이 의심될 때 무엇을 바꾸나?",
+    q_en: "What changes when heteroskedasticity is suspected?",
+    a_ko: "로버스트(HC) 표준오차를 쓴다. 계수는 그대로, 추론이 교정된다.",
+    a_en: "Use robust (HC) standard errors; coefficients unchanged, inference corrected."
+  }]
+}, {
+  id: "c0",
+  phase: "p3",
+  week: 15,
+  day: 27,
+  titleKo: "RCT 설계 + 검정력 분석 ★",
+  titleEn: "RCT Design + Power Analysis ★",
+  learnKo: "실험을 시작하기 '전에' 표본 크기를 정하는 검정력 분석. 너의 RCT 현장경험(OYE Kenya)을 '설계까지 할 수 있다'로 끌어올리는 핵심 조각이자, J-PAL·World Bank DIME·gui2de가 직접 요구하는 역량이다.",
+  learnEn: "Power analysis sizes a study 'before' it runs. This is the piece that lifts your field RCT experience (OYE Kenya) to 'can design one,' and a skill J-PAL, World Bank DIME, and gui2de ask for directly.",
+  concepts: [{
+    term_ko: "검정력",
+    term_en: "Statistical power",
+    body_ko: "실제로 효과가 존재할 때 그것을 통계적으로 탐지해낼 확률(1−β)이다. 보통 0.8을 목표로 한다. 표본이 작으면 검정력이 낮아 진짜 효과도 '유의하지 않다'고 잘못 결론낸다(2종 오류).",
+    body_en: "The probability (1−β) of detecting an effect that truly exists; usually targeted at 0.8. With small samples, power is low and a real effect is wrongly called 'not significant' (Type II error)."
+  }, {
+    term_ko: "최소탐지효과(MDE)",
+    term_en: "Minimum Detectable Effect (MDE)",
+    body_ko: "주어진 표본·검정력으로 통계적으로 탐지 가능한 '가장 작은 효과 크기'다. 정책적으로 의미 있는 효과(예: 교육 0.5년 증가)를 잡을 만큼 표본이 충분한지 판단하는 기준이 된다.",
+    body_en: "The smallest effect a given sample and power can detect. It tells you whether your sample is large enough to catch a policy-meaningful effect (e.g., +0.5 years of schooling)."
+  }, {
+    term_ko: "효과크기 & 분산",
+    term_en: "Effect size & variance",
+    body_ko: "표본 크기는 효과가 작을수록, 결과의 분산(σ)이 클수록 더 커야 한다. calibration 데이터로 이 둘을 추정해 계산에 넣는다 — gui2de 과제 4가 calibration 데이터를 준 이유다.",
+    body_en: "Required sample grows as the effect shrinks and as outcome variance (σ) rises. You estimate both from a calibration dataset to plug in — exactly why gui2de's Exercise 4 provided one."
+  }, {
+    term_ko: "군집 무작위 & ICC",
+    term_en: "Clustered RCT & ICC",
+    body_ko: "학교·마을 단위로 처치를 배정하면(군집 RCT), 같은 군집 내 개인들이 비슷해 정보량이 줄어든다. 급내상관(ICC)이 클수록 필요한 표본이 크게 늘어난다. 설계에서 반드시 반영해야 한다.",
+    body_en: "When treatment is assigned by school or village (clustered RCT), individuals within a cluster are similar, reducing information. A higher intra-cluster correlation (ICC) sharply raises the required sample. Designs must account for it."
+  }],
+  tasks: [{
+    label: "J-PAL: Power Calculations (research resource)",
+    url: "https://www.povertyactionlab.org/resource/power-calculations"
+  }, {
+    label: "EGAP: Power Analysis 10 Things to Know",
+    url: "https://egap.org/resource/10-things-to-know-about-statistical-power/"
+  }, {
+    label: "R: pwr 패키지 vignette",
+    url: "https://cran.r-project.org/web/packages/pwr/vignettes/pwr-vignette.html"
+  }, {
+    label: "Stata: power command (docs)",
+    url: "https://www.stata.com/manuals/pss.pdf"
+  }],
+  outputKo: "★ calibration 데이터로 표본 크기 계산 (R pwr 또는 Stata power) + 모든 가정을 적은 방법론 노트 → 포트폴리오 항목",
+  outputEn: "★ Sample-size calc from a calibration dataset (R pwr or Stata power) + a methodology note listing every assumption → a portfolio piece",
+  quiz: [{
+    q_ko: "잡으려는 효과가 작아지면 필요한 표본 크기는 어떻게 되나?",
+    q_en: "As the effect you want to detect gets smaller, what happens to required sample size?",
+    a_ko: "커진다. 작은 효과는 노이즈에 묻히기 쉬워, 구분해내려면 더 많은 관측치가 필요하다.",
+    a_en: "It grows. Smaller effects are easily masked by noise, so more observations are needed to distinguish them."
+  }, {
+    q_ko: "검정력 0.8의 의미는?",
+    q_en: "What does power = 0.8 mean?",
+    a_ko: "실제로 효과가 있을 때 그것을 유의하게 탐지할 확률이 80%라는 뜻. 즉 20%는 진짜 효과를 놓친다(2종 오류).",
+    a_en: "An 80% chance of detecting an effect that truly exists. The other 20% miss it (Type II error)."
+  }, {
+    q_ko: "군집 RCT에서 ICC가 크면 표본은?",
+    q_en: "In a clustered RCT, what does a high ICC do to sample size?",
+    a_ko: "필요한 표본이 늘어난다. 같은 군집 내 개인이 비슷해 새 정보가 적기 때문이다.",
+    a_en: "It increases the required sample, because individuals within a cluster are similar and add little new information."
+  }]
+}, {
+  id: "c1",
+  phase: "p3",
+  week: 16,
+  day: 28,
+  titleKo: "고정효과 (Fixed Effects)",
+  titleEn: "Fixed Effects",
+  learnKo: "패널 데이터에서 관측 안 되는 시간불변 교란을 제거하는 고정효과. 인과추론 실전의 기본기이자 gui2de 같은 RCT 연구소의 일상 도구.",
+  learnEn: "Fixed effects remove unobserved time-invariant confounders in panel data — a workhorse of applied causal inference and daily tooling at RCT labs like gui2de.",
+  concepts: [{
+    term_ko: "패널 데이터",
+    term_en: "Panel data",
+    body_ko: "같은 개체(국가·개인·기업 등)를 여러 시점에 걸쳐 반복 관측한 데이터다. 같은 개체를 여러 번 봤다는 점이 인과추론에 강력한 지렛대가 된다.",
+    body_en: "Data observing the same units (countries, people, firms) over multiple periods. Seeing the same unit repeatedly is a powerful lever for causal inference."
+  }, {
+    term_ko: "고정효과",
+    term_en: "Fixed effects",
+    body_ko: "개체나 시간마다 고유한 더미를 넣어 그 차원의 모든 시간불변(또는 개체불변) 특성을 흡수·통제하는 기법이다. 관측되지 않은 교란도 제거할 수 있는 게 큰 장점이다.",
+    body_en: "Adding a dummy per unit or time to absorb all time-invariant (or unit-invariant) traits along that dimension. Its strength is removing even unobserved confounders."
+  }, {
+    term_ko: "개체 내 추정량",
+    term_en: "Within estimator",
+    body_ko: "고정효과는 결국 '각 개체 내부의 변동'만 사용해 효과를 추정한다. 개체 간 비교가 아니라 같은 개체의 시점 간 변화에서 정보를 얻는다.",
+    body_en: "Fixed effects ultimately use only 'within-unit variation,' drawing information from changes over time within the same unit rather than across units."
+  }, {
+    term_ko: "양방향 고정효과",
+    term_en: "Two-way fixed effects",
+    body_ko: "개체 고정효과와 시간 고정효과를 동시에 넣는 방식이다. 시간불변 개체 특성과 모든 개체에 공통인 시간 충격을 함께 통제한다. DiD의 기본 형태이기도 하다.",
+    body_en: "Including both unit and time fixed effects, controlling time-invariant unit traits and common time shocks together. It's also the basic DiD form."
+  }],
+  tasks: [{
+    label: "The Effect Ch.16 Fixed Effects",
+    url: "https://theeffectbook.net/ch-FixedEffects.html"
+  }, {
+    label: "Mixtape: Panel Data",
+    url: "https://mixtape.scunning.com/08-panel_data"
+  }, {
+    label: "fixest feols() 문서",
+    url: "https://lrberge.github.io/fixest/"
+  }, {
+    label: "Example repo: panel-data notebook",
+    url: "https://github.com/search?q=panel+data+notebook+example+repository&type=repositories"
+  }],
+  outputKo: "World Bank 국가-연도 패널로 양방향 고정효과 모형",
+  outputEn: "A two-way FE model on a WB country-year panel",
+  quiz: [{
+    q_ko: "양방향 고정효과는 무엇을 통제하나?",
+    q_en: "What does two-way FE control for?",
+    a_ko: "개체 FE로 시간불변 개체특성, 시간 FE로 공통 시간충격을 통제.",
+    a_en: "Unit FE for time-invariant unit traits; time FE for common time shocks."
+  }, {
+    q_ko: "고정효과가 통제 못하는 교란은?",
+    q_en: "What confounding can FE not handle?",
+    a_ko: "시간에 따라 변하는(time-varying) 개체별 교란요인.",
+    a_en: "Time-varying, unit-specific confounders."
+  }, {
+    q_ko: "fixest에서 FE를 지정하는 문법은?",
+    q_en: "fixest syntax for FEs?",
+    a_ko: "feols(y ~ x | id + year, data=df) — | 뒤에 고정효과.",
+    a_en: "feols(y ~ x | id + year, data=df) — FEs after the |."
+  }]
+}, {
+  id: "c2",
+  phase: "p3",
+  week: 17,
+  day: 29,
+  titleKo: "이중차분 DiD (고전 + 현대)",
+  titleEn: "Difference-in-Differences (classic + modern)",
+  learnKo: "처치군의 전후 변화를 대조군 변화로 보정하는 DiD. 정책평가의 표준이며, 현대의 staggered(시차 도입) 이슈와 최신 추정량까지 본다.",
+  learnEn: "DiD adjusts a treatment group's before-after change by the control group's change. The policy-eval standard — through to modern staggered-adoption issues and new estimators.",
+  concepts: [{
+    term_ko: "이중차분",
+    term_en: "Difference-in-Differences (DiD)",
+    body_ko: "처치군의 (사후−사전) 변화에서 대조군의 (사후−사전) 변화를 빼서 정책 효과를 추정한다. 두 군에 공통으로 작용한 시간 추세를 상쇄하는 것이 핵심이다.",
+    body_en: "Estimates the effect as the treatment group's (after−before) change minus the control group's, canceling the time trend common to both."
+  }, {
+    term_ko: "평행추세 가정",
+    term_en: "Parallel trends",
+    body_ko: "DiD의 핵심 식별 가정이다. 처치가 없었다면 두 군이 같은 추세를 따랐을 것이라는 전제다. 처치 전 기간의 추세 비교로 점검한다.",
+    body_en: "DiD's key identifying assumption: absent treatment, both groups would have followed the same trend. Checked by comparing pre-treatment trends."
+  }, {
+    term_ko: "시차 도입",
+    term_en: "Staggered adoption",
+    body_ko: "여러 집단이 서로 다른 시점에 처치를 받는 상황이다. 전통적 양방향 FE는 이 경우 '이미 처치된 집단'을 비교군으로 잘못 쓰는 편향이 생길 수 있다.",
+    body_en: "When different groups are treated at different times. Traditional two-way FE can be biased here by wrongly using already-treated groups as controls."
+  }, {
+    term_ko: "Callaway-Sant'Anna 추정량",
+    term_en: "Callaway-Sant'Anna estimator",
+    body_ko: "시차 도입 상황의 편향을 바로잡는 현대 DiD 추정량이다. R의 did 패키지로 구현하며, 집단·시점별 효과를 적절히 집계한다.",
+    body_en: "A modern DiD estimator correcting staggered-adoption bias, implemented in R's did package by properly aggregating group-time effects."
+  }],
+  tasks: [{
+    label: "The Effect Ch.18 DiD",
+    url: "https://theeffectbook.net/ch-DifferenceinDifference.html"
+  }, {
+    label: "MRU: Intro to DiD (영상·video)",
+    url: "https://mru.org/mastering-econometrics-joshua-angrist"
+  }, {
+    label: "did 패키지 (Callaway & Sant'Anna)",
+    url: "https://bcallaway11.github.io/did/articles/did-basics.html"
+  }, {
+    label: "Example repo: DiD project",
+    url: "https://github.com/search?q=difference+in+differences+example+repository&type=repositories"
+  }],
+  outputKo: "고전 2×2 DiD(fixest) → 시차도입 DiD(did::att_gt) 비교",
+  outputEn: "Classic 2×2 DiD vs staggered DiD (did::att_gt)",
+  quiz: [{
+    q_ko: "DiD의 핵심 식별 가정은?",
+    q_en: "DiD's key identifying assumption?",
+    a_ko: "평행추세 — 처치 없었다면 두 군이 같은 추세를 따랐을 것.",
+    a_en: "Parallel trends — absent treatment, both groups would follow the same trend."
+  }, {
+    q_ko: "전통적 TWFE가 staggered에서 편향되는 이유는?",
+    q_en: "Why is traditional TWFE biased under staggered adoption?",
+    a_ko: "이미 처치된 집단이 비교군으로 잘못 쓰이는 'forbidden comparison' 때문.",
+    a_en: "Because already-treated groups get used as controls — a 'forbidden comparison.'"
+  }, {
+    q_ko: "평행추세를 점검하는 방법은?",
+    q_en: "How to check parallel trends?",
+    a_ko: "처치 전 추세 비교(event-study 사전계수가 0 근처인지 확인).",
+    a_en: "Compare pre-treatment trends (event-study pre-coefficients near zero)."
+  }]
+}, {
+  id: "c3",
+  phase: "p3",
+  week: 18,
+  day: 30,
+  titleKo: "도구변수(IV) + 이벤트 스터디",
+  titleEn: "Instrumental Variables + Event Studies",
+  learnKo: "내생성 문제를 도구변수로 해결하는 2SLS와, 처치 전후 동학을 보는 이벤트 스터디. 관측 데이터에서 인과를 끌어내는 강력한 도구.",
+  learnEn: "2SLS solves endogeneity via instruments; event studies trace pre/post dynamics. Powerful tools for extracting causality from observational data.",
+  concepts: [{
+    term_ko: "내생성",
+    term_en: "Endogeneity",
+    body_ko: "설명변수가 오차항과 상관되어 OLS 추정치가 편향되는 문제다. 누락변수, 역인과, 측정오차가 주요 원인이다. 도구변수가 대표적 해결책이다.",
+    body_en: "When a regressor correlates with the error term, biasing OLS. Main causes: omitted variables, reverse causation, measurement error. Instruments are a key fix."
+  }, {
+    term_ko: "도구변수",
+    term_en: "Instrument",
+    body_ko: "내생변수와는 상관되지만 결과변수에는 오직 그 내생변수를 '통해서만' 영향을 주는 변수다. 두 조건(관련성, 배제제약)을 모두 만족해야 유효하다.",
+    body_en: "A variable correlated with the endogenous regressor but affecting the outcome only through it. Valid only if both relevance and the exclusion restriction hold."
+  }, {
+    term_ko: "2단계 최소제곱",
+    term_en: "2SLS (Two-Stage Least Squares)",
+    body_ko: "1단계에서 도구로 내생변수를 예측하고, 2단계에서 그 예측값으로 결과를 회귀한다. 1단계 F통계량으로 도구의 강도를 점검한다(대략 >10).",
+    body_en: "Stage 1 predicts the endogenous variable from instruments; stage 2 regresses the outcome on those predictions. Check instrument strength via the first-stage F (roughly >10)."
+  }, {
+    term_ko: "배제 제약",
+    term_en: "Exclusion restriction",
+    body_ko: "도구가 결과에 직접적인 경로 없이 오직 내생변수를 통해서만 영향을 준다는 가정이다. 검정 불가능하므로 이론·맥락으로 정당화해야 한다.",
+    body_en: "The assumption that the instrument affects the outcome only through the endogenous variable, with no direct path. Untestable — must be justified by theory and context."
+  }],
+  tasks: [{
+    label: "The Effect Ch.19 IV / Ch.17 Event Studies",
+    url: "https://theeffectbook.net/ch-InstrumentalVariables.html"
+  }, {
+    label: "Mixtape: Instrumental Variables",
+    url: "https://mixtape.scunning.com/07-instrumental_variables"
+  }, {
+    label: "MRU: Intro to IV (영상·video)",
+    url: "https://mru.org/mastering-econometrics-joshua-angrist"
+  }, {
+    label: "Example repo: IV / event-study notebook",
+    url: "https://github.com/search?q=instrumental+variables+example+repository&type=repositories"
+  }],
+  outputKo: "2SLS 추정 + 1단계 진단(first-stage F)",
+  outputEn: "A 2SLS estimate with first-stage diagnostics",
+  quiz: [{
+    q_ko: "유효한 도구변수의 두 조건은?",
+    q_en: "Two conditions for a valid instrument?",
+    a_ko: "관련성(내생변수와 상관)+배제제약(결과엔 내생변수 통해서만).",
+    a_en: "Relevance (correlated with the endogenous var) + exclusion (affects outcome only through it)."
+  }, {
+    q_ko: "약한 도구 문제의 점검 지표는?",
+    q_en: "How to check for a weak instrument?",
+    a_ko: "1단계 F통계량(대략 >10).",
+    a_en: "The first-stage F-statistic (roughly >10)."
+  }, {
+    q_ko: "이벤트 스터디는 무엇을 보여주나?",
+    q_en: "What does an event study show?",
+    a_ko: "처치 시점 기준 상대시간별 효과 — 사전추세 점검과 동적 효과를 동시에.",
+    a_en: "Effects by time relative to treatment — checking pre-trends and dynamic effects at once."
+  }]
+}, {
+  id: "c4",
+  phase: "p3",
+  week: 19,
+  day: 31,
+  titleKo: "회귀불연속(RDD) + 강건성",
+  titleEn: "Regression Discontinuity + Robustness",
+  learnKo: "컷오프 근처의 준실험을 이용하는 RDD와, 결과의 견고함을 점검하는 민감도 분석. ★ Phase 3 인과 파트 마무리 — causal repo 커밋.",
+  learnEn: "RDD exploits a quasi-experiment near a cutoff; sensitivity analysis checks robustness. ★ Closes the causal half of Phase 3 — commit the causal repo.",
+  concepts: [{
+    term_ko: "회귀불연속 설계",
+    term_en: "Regression Discontinuity (RDD)",
+    body_ko: "어떤 연속 점수가 컷오프를 넘느냐에 따라 처치가 결정될 때, 컷오프 바로 위·아래를 비교해 인과효과를 추정한다. 경계 근처에서는 처치 여부 말고는 거의 같다고 본다.",
+    body_en: "When treatment depends on whether a continuous score crosses a cutoff, compare just above vs just below. Near the boundary, units differ only in treatment."
+  }, {
+    term_ko: "러닝 변수",
+    term_en: "Running variable",
+    body_ko: "처치 여부를 결정하는 연속 점수다(예: 시험 점수, 소득 기준선). 이 변수의 컷오프에서 결과가 점프하는지를 본다.",
+    body_en: "The continuous score determining treatment (e.g., a test score, an income threshold). You look for a jump in the outcome at its cutoff."
+  }, {
+    term_ko: "대역폭",
+    term_en: "Bandwidth",
+    body_ko: "컷오프 주변에서 분석에 포함할 구간의 폭이다. 좁으면 편향은 줄지만 분산이 커지고, 넓으면 반대다. 최적 대역폭 선택과 민감도 점검이 중요하다.",
+    body_en: "The window around the cutoff used for analysis. Narrow = less bias but more variance; wide = the reverse. Optimal-bandwidth choice and sensitivity checks matter."
+  }, {
+    term_ko: "민감도 분석",
+    term_en: "Sensitivity analysis",
+    body_ko: "핵심 가정을 조금씩 완화했을 때 결론이 얼마나 흔들리는지 점검하는 것이다(예: HonestDiD). 결과가 가정에 과도하게 의존하지 않음을 보여 신뢰도를 높인다.",
+    body_en: "Checking how much conclusions move when key assumptions are relaxed (e.g., HonestDiD). It shows results don't hinge on fragile assumptions, raising credibility."
+  }],
+  tasks: [{
+    label: "The Effect Ch.20 RDD",
+    url: "https://theeffectbook.net/ch-RegressionDiscontinuity.html"
+  }, {
+    label: "Mixtape: Regression Discontinuity",
+    url: "https://mixtape.scunning.com/06-regression_discontinuity"
+  }, {
+    label: "rdrobust 패키지",
+    url: "https://rdpackages.github.io/rdrobust/"
+  }, {
+    label: "HonestDiD (민감도·sensitivity)",
+    url: "https://github.com/asheshrambachan/HonestDiD"
+  }, {
+    label: "Example repo: RDD project",
+    url: "https://github.com/search?q=regression+discontinuity+example+repository&type=repositories"
+  }],
+  outputKo: "★ RDD 플롯+추정 → causal-inference-projects repo 커밋",
+  outputEn: "★ An RDD plot+estimate → commit to causal-inference-projects",
+  quiz: [{
+    q_ko: "RDD의 핵심 식별 가정은?",
+    q_en: "RDD's key identifying assumption?",
+    a_ko: "연속성 — 처치를 제외한 모든 것이 컷오프에서 연속.",
+    a_en: "Continuity — everything except treatment is continuous at the cutoff."
+  }, {
+    q_ko: "대역폭이 좁으면?",
+    q_en: "If the bandwidth is narrow?",
+    a_ko: "편향↓ 분산↑. 최적대역폭+민감도 점검이 필요하다.",
+    a_en: "Less bias, more variance. Needs optimal-bandwidth choice + sensitivity checks."
+  }, {
+    q_ko: "sharp vs fuzzy RDD는?",
+    q_en: "Sharp vs fuzzy RDD?",
+    a_ko: "sharp=처치확률 0→1 점프, fuzzy=부분 변화(IV처럼 처리).",
+    a_en: "Sharp: treatment probability jumps 0→1; fuzzy: partial change (handled like IV)."
+  }]
+}, {
+  id: "c5",
+  phase: "p3",
+  week: 20,
+  day: 32,
+  titleKo: "ML 기초: 편향-분산 · 교차검증",
+  titleEn: "ML Foundations: Bias-Variance, CV",
+  learnKo: "예측 모델링의 토대 — 편향-분산 균형과 교차검증. tidymodels 워크플로를 세팅한다. 여기서부터 ML 파트가 시작된다.",
+  learnEn: "The foundation of prediction — the bias-variance tradeoff and cross-validation. Set up the tidymodels workflow; the ML half begins here.",
+  concepts: [{
+    term_ko: "편향-분산 균형",
+    term_en: "Bias-variance tradeoff",
+    body_ko: "단순한 모델은 편향이 크고 분산이 작으며, 복잡한 모델은 그 반대다. 총 예측오차를 최소화하는 적절한 복잡도를 찾는 것이 핵심이다.",
+    body_en: "Simple models have high bias, low variance; complex models the reverse. The goal is the complexity that minimizes total prediction error."
+  }, {
+    term_ko: "과적합",
+    term_en: "Overfitting",
+    body_ko: "모델이 훈련데이터의 우연한 잡음까지 학습해 새 데이터에서 성능이 떨어지는 것이다. 분산이 큰 복잡한 모델에서 흔하다.",
+    body_en: "Learning the training data's random noise, hurting new-data performance. Common in complex, high-variance models."
+  }, {
+    term_ko: "k-겹 교차검증",
+    term_en: "k-fold cross-validation",
+    body_ko: "데이터를 k조각으로 나눠 각 조각이 한 번씩 검증셋이 되게 k번 학습·평가한 뒤 평균낸다. 단일 분할보다 성능 추정이 안정적이고 데이터를 효율적으로 쓴다.",
+    body_en: "Split data into k folds; train/evaluate k times so each fold is the validation set once, then average. More stable than a single split and uses data efficiently."
+  }, {
+    term_ko: "tidymodels",
+    term_en: "tidymodels",
+    body_ko: "R의 모델링 프레임워크다. rsample(분할), recipes(전처리), parsnip(모델), yardstick(평가)을 일관된 문법으로 묶어 ML 워크플로를 깔끔하게 만든다.",
+    body_en: "R's modeling framework tying rsample (splitting), recipes (preprocessing), parsnip (models), and yardstick (metrics) into one consistent ML workflow."
+  }],
+  tasks: [{
+    label: "ISLR Ch.2 & Ch.5 (Statistical Learning, Resampling)",
+    url: "https://www.statlearning.com/"
+  }, {
+    label: "StatQuest ML playlist (영상·video)",
+    url: "https://www.youtube.com/playlist?list=PLblh5JKOoLUICTaGLRoHQDuF_7q2GfuJF"
+  }, {
+    label: "Tidy Modeling with R",
+    url: "https://www.tmwr.org/"
+  }, {
+    label: "Example repo: ML workflow",
+    url: "https://github.com/search?q=machine+learning+workflow+example+repository&type=repositories"
+  }],
+  outputKo: "tidymodels로 train/test 분할 + k-fold CV 워크플로",
+  outputEn: "A tidymodels train/test split + k-fold CV workflow",
+  quiz: [{
+    q_ko: "k-fold CV를 단일 분할보다 선호하는 이유는?",
+    q_en: "Why prefer k-fold CV over a single split?",
+    a_ko: "모두가 한 번씩 검증셋 → 추정 분산↓, 데이터 효율↑.",
+    a_en: "Every fold serves as validation once → lower estimate variance, better data use."
+  }, {
+    q_ko: "과적합이란?",
+    q_en: "What is overfitting?",
+    a_ko: "훈련데이터 잡음까지 학습해 새 데이터 성능 저하.",
+    a_en: "Learning training noise so new-data performance drops."
+  }, {
+    q_ko: "편향-분산 균형이란?",
+    q_en: "The bias-variance tradeoff?",
+    a_ko: "단순=편향↑분산↓, 복잡=편향↓분산↑. 총오차 최소점을 찾는다.",
+    a_en: "Simple = high bias/low variance; complex = the reverse. Find the total-error minimum."
+  }]
+}, {
+  id: "c6",
+  phase: "p3",
+  week: 21,
+  day: 33,
+  titleKo: "정규화: Ridge / Lasso / Elastic Net",
+  titleEn: "Regularization: Ridge / Lasso / Elastic Net",
+  learnKo: "과적합을 막고 변수를 선택하는 정규화. Lasso의 변수선택 효과는 변수가 많은 정책 데이터에서 특히 유용하다.",
+  learnEn: "Regularization curbs overfitting and selects variables. Lasso's variable selection is especially useful in high-dimensional policy data.",
+  concepts: [{
+    term_ko: "정규화",
+    term_en: "Regularization",
+    body_ko: "회귀계수에 페널티를 부과해 모델이 너무 복잡해지는 것을 억제하는 기법이다. 과적합을 줄이고 일반화 성능을 높인다.",
+    body_en: "Imposing a penalty on coefficients to keep a model from getting too complex — reducing overfitting and improving generalization."
+  }, {
+    term_ko: "릿지 (L2)",
+    term_en: "Ridge (L2)",
+    body_ko: "계수의 제곱합에 페널티를 준다. 계수를 0에 가깝게 줄이지만 정확히 0으로 만들지는 않는다. 상관 높은 변수들을 안정적으로 다룬다.",
+    body_en: "Penalizes the sum of squared coefficients, shrinking them toward zero but not exactly to zero. Handles correlated predictors stably."
+  }, {
+    term_ko: "라쏘 (L1)",
+    term_en: "Lasso (L1)",
+    body_ko: "계수의 절댓값합에 페널티를 준다. 일부 계수를 정확히 0으로 만들어 자동 변수선택 효과가 있다. 해석 가능한 희소 모델을 만든다.",
+    body_en: "Penalizes the sum of absolute coefficients, driving some exactly to zero — automatic variable selection, producing an interpretable sparse model."
+  }, {
+    term_ko: "람다 (페널티 강도)",
+    term_en: "Lambda (penalty strength)",
+    body_ko: "페널티의 세기를 정하는 하이퍼파라미터다. 크면 모델이 단순해지고(편향↑), 작으면 복잡해진다(분산↑). 교차검증으로 최적값을 고른다.",
+    body_en: "The hyperparameter setting penalty strength. Larger = simpler model (more bias); smaller = more complex (more variance). Chosen by cross-validation."
+  }],
+  tasks: [{
+    label: "ISLR Ch.6 Regularization",
+    url: "https://www.statlearning.com/"
+  }, {
+    label: "StatQuest: Ridge/Lasso/Elastic Net (영상·video)",
+    url: "https://www.youtube.com/playlist?list=PLblh5JKOoLUICTaGLRoHQDuF_7q2GfuJF"
+  }, {
+    label: "HOML 정규화 회귀 장",
+    url: "https://bradleyboehmke.github.io/HOML/"
+  }, {
+    label: "Example repo: regularization notebook",
+    url: "https://github.com/search?q=lasso+ridge+example+repository&type=repositories"
+  }],
+  outputKo: "교차검증 lambda를 쓴 Lasso + 계수 경로 플롯",
+  outputEn: "A CV-tuned Lasso + coefficient-path plot",
+  quiz: [{
+    q_ko: "Ridge(L2)와 Lasso(L1)의 핵심 차이는?",
+    q_en: "Key difference between Ridge and Lasso?",
+    a_ko: "Ridge는 0 근처로 축소(유지), Lasso는 일부를 정확히 0으로 만들어 변수선택.",
+    a_en: "Ridge shrinks toward zero (keeps all); Lasso zeros some out for variable selection."
+  }, {
+    q_ko: "lambda가 커지면 모델은?",
+    q_en: "What happens as lambda grows?",
+    a_ko: "페널티↑ → 계수↓, 모델 단순화(편향↑·분산↓).",
+    a_en: "Stronger penalty → smaller coefficients, simpler model (more bias, less variance)."
+  }, {
+    q_ko: "Elastic Net은 무엇을 결합?",
+    q_en: "What does Elastic Net combine?",
+    a_ko: "L1+L2 — 변수선택(Lasso)과 상관변수 안정성(Ridge)을 절충.",
+    a_en: "L1+L2 — balancing Lasso's selection with Ridge's stability on correlated predictors."
+  }]
+}, {
+  id: "c7",
+  phase: "p3",
+  week: 22,
+  day: 34,
+  titleKo: "트리 · 랜덤 포레스트 · 배깅",
+  titleEn: "Trees · Random Forests · Bagging",
+  learnKo: "비선형 관계를 잡는 의사결정나무와, 여러 나무를 평균내 안정화하는 랜덤 포레스트. 변수중요도로 해석까지.",
+  learnEn: "Decision trees capture nonlinearity; random forests average many trees for stability. Plus variable importance for interpretation.",
+  concepts: [{
+    term_ko: "의사결정나무",
+    term_en: "Decision tree",
+    body_ko: "데이터를 조건에 따라 가지치기하며 예측하는 모델이다. 직관적이고 비선형·상호작용을 자연스럽게 잡지만, 단독으로는 과적합되기 쉽다.",
+    body_en: "A model that splits data by conditions to predict. Intuitive and naturally captures nonlinearity and interactions, but prone to overfitting alone."
+  }, {
+    term_ko: "배깅",
+    term_en: "Bagging",
+    body_ko: "데이터를 부트스트랩(복원추출)으로 여러 번 뽑아 모델을 만들고 그 예측을 평균/투표로 결합하는 기법이다. 분산을 줄여 안정성을 높인다.",
+    body_en: "Bootstrap-sampling the data many times, building a model on each, and averaging/voting predictions. It reduces variance for stability."
+  }, {
+    term_ko: "랜덤 포레스트",
+    term_en: "Random forest",
+    body_ko: "배깅에 더해 각 분기마다 변수의 무작위 부분집합만 고려하는 기법이다. 나무들 사이의 상관을 낮춰 단일 나무보다 훨씬 강건하고 정확하다.",
+    body_en: "Bagging plus considering only a random subset of variables at each split. This decorrelates trees, making it far more robust and accurate than a single tree."
+  }, {
+    term_ko: "변수 중요도",
+    term_en: "Variable importance",
+    body_ko: "각 변수가 예측 성능(불순도 감소 등)에 얼마나 기여했는지의 순위다. 블랙박스 모델의 해석에 첫 단서를 준다(vip 패키지).",
+    body_en: "A ranking of how much each variable contributes to prediction (e.g., impurity reduction). A first clue for interpreting black-box models (vip package)."
+  }],
+  tasks: [{
+    label: "ISLR Ch.8 Tree-Based Methods",
+    url: "https://www.statlearning.com/"
+  }, {
+    label: "StatQuest: Decision Trees, Random Forests (영상·video)",
+    url: "https://www.youtube.com/playlist?list=PLblh5JKOoLUICTaGLRoHQDuF_7q2GfuJF"
+  }, {
+    label: "HOML 의사결정나무/랜덤포레스트",
+    url: "https://bradleyboehmke.github.io/HOML/DT.html"
+  }, {
+    label: "Example repo: tree-based model notebook",
+    url: "https://github.com/search?q=random+forest+example+repository&type=repositories"
+  }],
+  outputKo: "랜덤 포레스트 + 변수중요도 플롯(vip)",
+  outputEn: "A random forest + variable-importance plot (vip)",
+  quiz: [{
+    q_ko: "랜덤 포레스트가 단일 나무보다 나은 이유는?",
+    q_en: "Why is a random forest better than a single tree?",
+    a_ko: "부트스트랩+무작위 변수 트리를 평균 → 분산↓·과적합 완화.",
+    a_en: "Averaging bootstrap + random-variable trees lowers variance and curbs overfitting."
+  }, {
+    q_ko: "배깅의 핵심 아이디어는?",
+    q_en: "Core idea of bagging?",
+    a_ko: "부트스트랩 샘플로 여러 모델을 만들고 평균/투표로 결합.",
+    a_en: "Build models on bootstrap samples and combine by averaging/voting."
+  }, {
+    q_ko: "변수 중요도가 알려주는 것은?",
+    q_en: "What does variable importance tell you?",
+    a_ko: "각 변수의 예측 기여(불순도 감소 등) 순위.",
+    a_en: "A ranking of each variable's contribution to prediction."
+  }]
+}, {
+  id: "c8",
+  phase: "p3",
+  week: 23,
+  day: 35,
+  titleKo: "XGBoost + 해석가능성 (SHAP)",
+  titleEn: "XGBoost + Interpretability (SHAP)",
+  learnKo: "오차를 순차적으로 보정하는 부스팅과 XGBoost, 그리고 블랙박스를 설명하는 SHAP. ★ ML repo 커밋으로 Phase 3 마무리.",
+  learnEn: "Boosting and XGBoost correct errors sequentially; SHAP explains black boxes. ★ Commit the ML repo to close Phase 3.",
+  concepts: [{
+    term_ko: "부스팅",
+    term_en: "Boosting",
+    body_ko: "약한 모델(주로 얕은 나무)을 순차적으로 쌓되, 각 단계가 이전 단계의 오차(잔차)를 집중적으로 보정하는 앙상블이다. 배깅의 병렬·독립 방식과 대조된다.",
+    body_en: "An ensemble that stacks weak models (usually shallow trees) sequentially, each correcting the previous step's residuals — contrasting with bagging's parallel, independent trees."
+  }, {
+    term_ko: "XGBoost",
+    term_en: "XGBoost",
+    body_ko: "경사 부스팅을 고속·고성능으로 구현한 라이브러리다. 정형 데이터(표 형태)에서 자주 최고 성능을 내며 캐글·실무에서 널리 쓰인다.",
+    body_en: "A fast, high-performance gradient-boosting library. It often tops the leaderboard on tabular data and is widely used in Kaggle and industry."
+  }, {
+    term_ko: "학습률",
+    term_en: "Learning rate",
+    body_ko: "각 부스팅 단계가 모델을 얼마나 크게 갱신할지 정하는 값이다. 작으면 더 많은 나무가 필요하지만 일반화가 보통 더 좋다.",
+    body_en: "How much each boosting step updates the model. Smaller needs more trees but usually generalizes better."
+  }, {
+    term_ko: "SHAP",
+    term_en: "SHAP",
+    body_ko: "게임이론에 기반해 '각 변수가 이 한 건의 예측에 얼마나 기여했는가'를 일관되게 계산하는 해석 도구다. 블랙박스 모델을 설명해 정책 활용 신뢰를 높인다.",
+    body_en: "A game-theory-based tool computing each variable's contribution to a single prediction, consistently. It explains black-box models, boosting trust for policy use."
+  }],
+  tasks: [{
+    label: "StatQuest: Gradient Boost / XGBoost (영상·video)",
+    url: "https://www.youtube.com/playlist?list=PLblh5JKOoLUICTaGLRoHQDuF_7q2GfuJF"
+  }, {
+    label: "HOML GBM / XGBoost 장",
+    url: "https://bradleyboehmke.github.io/HOML/gbm.html"
+  }, {
+    label: "Kaggle: ML Explainability (SHAP)",
+    url: "https://www.kaggle.com/learn/machine-learning-explainability"
+  }, {
+    label: "Example repo: XGBoost benchmark",
+    url: "https://github.com/search?q=xgboost+benchmark+example+repository&type=repositories"
+  }],
+  outputKo: "★ XGBoost vs 랜덤포레스트 벤치마크 + SHAP 플롯 → ml-projects repo",
+  outputEn: "★ XGBoost vs RF benchmark + SHAP plot → ml-projects repo",
+  quiz: [{
+    q_ko: "배깅과 부스팅의 학습 방식 차이는?",
+    q_en: "Bagging vs boosting in how they learn?",
+    a_ko: "배깅=독립 나무 병렬 후 평균, 부스팅=이전 나무의 잔차를 순차 보정.",
+    a_en: "Bagging: independent trees in parallel, averaged. Boosting: sequentially correcting prior residuals."
+  }, {
+    q_ko: "학습률이 작으면?",
+    q_en: "If the learning rate is small?",
+    a_ko: "단계 보정이 작아 트리가 더 필요하나 일반화가 보통 향상.",
+    a_en: "Smaller updates need more trees but usually generalize better."
+  }, {
+    q_ko: "SHAP가 해결하는 문제는?",
+    q_en: "What problem does SHAP solve?",
+    a_ko: "블랙박스 모델에서 변수별 예측 기여를 일관되게 설명.",
+    a_en: "It consistently explains each variable's contribution in black-box models."
+  }]
+},
+// ═══════ PHASE 4 ═══════
+{
+  id: "g1",
+  phase: "p4",
+  week: 24,
+  day: 36,
+  titleKo: "공간 데이터 기초 (GIS)",
+  titleEn: "Spatial Data Foundations (GIS)",
+  learnKo: "지리 데이터의 구조(점·선·면, 좌표계)와 sf 패키지로 다루는 법. 개발/정책에서 유용하지만, 필요할 때 꺼내 쓰는 선택 역량으로 둔다.",
+  learnEn: "The structure of geographic data (points/lines/polygons, coordinate systems) and handling it with sf. Useful in development/policy, but best treated as an on-demand skill.",
+  concepts: [{
+    term_ko: "sf (simple features)",
+    term_en: "sf (simple features)",
+    body_ko: "R에서 공간 데이터를 다루는 표준 패키지다. 일반 데이터프레임에 'geometry'라는 공간 열을 더한 형태라, dplyr 문법을 그대로 쓰면서 공간 연산을 할 수 있다.",
+    body_en: "R's standard package for spatial data. It adds a 'geometry' column to an ordinary data frame, so you keep dplyr syntax while doing spatial operations."
+  }, {
+    term_ko: "좌표참조체계",
+    term_en: "CRS (Coordinate Reference System)",
+    body_ko: "위경도나 투영 좌표가 지구 위 어디를 가리키는지 정의하는 체계다. 두 공간 데이터를 결합·계산하기 전에 CRS를 반드시 통일해야 거리·면적이 맞다.",
+    body_en: "The system defining how coordinates map to locations on Earth. CRSs must match before combining/measuring spatial data, or distances and areas will be wrong."
+  }, {
+    term_ko: "벡터 vs 래스터",
+    term_en: "Vector vs Raster",
+    body_ko: "벡터는 점·선·면으로 경계나 위치를 표현하고(예: 행정구역, 병원 위치), 래스터는 격자 셀로 연속 표면을 표현한다(예: 위성영상, 고도). 분석 목적에 따라 형식을 고른다.",
+    body_en: "Vector represents boundaries/locations as points/lines/polygons (districts, hospital sites); raster represents continuous surfaces as grid cells (satellite, elevation). Choose by purpose."
+  }, {
+    term_ko: "공간 조인",
+    term_en: "Spatial join",
+    body_ko: "속성 키가 아니라 위치 관계(포함·교차·근접)로 두 공간 데이터를 결합하는 것이다. 예: '각 병원이 어느 행정구역에 속하는가'. gui2de 클러스터링 과제의 핵심 연산이다.",
+    body_en: "Joining spatial data by location relationships (contains, intersects, near) rather than an attribute key — e.g., 'which district each hospital falls in.' The core operation for gui2de's clustering task."
+  }],
+  tasks: [{
+    label: "Geocomputation with R (무료 책·free book)",
+    url: "https://r.geocompx.org/"
+  }, {
+    label: "sf 패키지 vignette",
+    url: "https://r-spatial.github.io/sf/articles/sf1.html"
+  }, {
+    label: "Example repo: spatial data project",
+    url: "https://github.com/search?q=spatial+analysis+example+repository&type=repositories"
+  }],
+  outputKo: "행정구역 shapefile 로드 + 지표 choropleth 지도",
+  outputEn: "Load an admin-boundary shapefile + a choropleth map",
+  quiz: [{
+    q_ko: "벡터 데이터와 래스터 데이터 차이는?",
+    q_en: "Vector vs raster data?",
+    a_ko: "벡터=점/선/면(경계·도로), 래스터=격자 셀(위성·고도).",
+    a_en: "Vector = points/lines/polygons (boundaries, roads); raster = grid cells (satellite, elevation)."
+  }, {
+    q_ko: "CRS(좌표계)가 중요한 이유는?",
+    q_en: "Why does the CRS matter?",
+    a_ko: "투영이 다르면 거리·면적·중첩이 틀려진다. 결합 전 통일 필요.",
+    a_en: "Different projections give wrong distances/areas/overlaps. Unify before combining."
+  }, {
+    q_ko: "공간 조인이란?",
+    q_en: "What is a spatial join?",
+    a_ko: "좌표 위치 관계(포함·교차)로 두 공간 데이터를 결합하는 것.",
+    a_en: "Joining two spatial datasets by location relationships (contains, intersects)."
+  }]
+}, {
+  id: "g2",
+  phase: "p4",
+  week: 25,
+  day: 37,
+  titleKo: "공간 분석 + 지도 시각화",
+  titleEn: "Spatial Analysis + Map Visualization",
+  learnKo: "공간 패턴 분석(근접성·클러스터)과 보고서급 지도. gui2de 과제 2(PHC 클러스터링)를 실제로 풀 수 있는 수준까지. ★ 공간분석 repo 커밋.",
+  learnEn: "Spatial pattern analysis (proximity, clusters) and report-grade maps — to the level of actually solving gui2de Exercise 2 (PHC clustering). ★ Commit the spatial repo.",
+  concepts: [{
+    term_ko: "코로플레스 지도",
+    term_en: "Choropleth map",
+    body_ko: "지역을 값에 따라 색으로 칠한 지도다. 흔한 함정은 인구 차이를 무시한 절대값 표시이므로, 보통 비율이나 밀도로 정규화해야 한다.",
+    body_en: "A map coloring regions by value. A common pitfall is showing absolute counts ignoring population — usually normalize to rates or density."
+  }, {
+    term_ko: "근접성 · 클러스터",
+    term_en: "Proximity & clustering",
+    body_ko: "점들이 서로 얼마나 가까이 모여 있는지를 분석하는 것이다. '반경 N km 내 다른 시설 수' 같은 지표가 gui2de의 'PHC가 군집을 이루는가' 질문에 직접 답한다.",
+    body_en: "Analyzing how closely points cluster — metrics like 'number of other facilities within N km' directly answer gui2de's 'are PHCs clustered?' question."
+  }, {
+    term_ko: "tmap / leaflet",
+    term_en: "tmap / leaflet",
+    body_ko: "tmap은 정적인 보고서용 지도, leaflet은 확대·이동이 되는 인터랙티브 웹 지도를 만든다. 외부 파트너에게 보여줄 산출물의 품질을 좌우한다.",
+    body_en: "tmap makes static report maps; leaflet makes interactive zoomable web maps. They drive the quality of outputs shown to external partners."
+  }, {
+    term_ko: "지오코딩",
+    term_en: "Geocoding",
+    body_ko: "주소나 지명을 위경도 좌표로 변환하는 것이다. 행정 데이터에 좌표가 없을 때 공간 분석을 가능하게 해주는 첫 단계다.",
+    body_en: "Converting addresses or place names into latitude/longitude. The first step that makes spatial analysis possible when admin data lacks coordinates."
+  }],
+  tasks: [{
+    label: "Geocomputation with R: Making maps",
+    url: "https://r.geocompx.org/adv-map.html"
+  }, {
+    label: "leaflet for R",
+    url: "https://rstudio.github.io/leaflet/"
+  }, {
+    label: "Example repo: map visualization",
+    url: "https://github.com/search?q=leaflet+map+example+repository&type=repositories"
+  }],
+  outputKo: "★ 공간분석 1개 (예: 지역별 시설 클러스터링·접근성 지도)",
+  outputEn: "★ One spatial analysis (e.g., facility clustering / accessibility map)",
+  quiz: [{
+    q_ko: "코로플레스 지도의 흔한 함정은?",
+    q_en: "Common pitfall of a choropleth map?",
+    a_ko: "인구 차이를 무시한 절대값 표시 — 보통 비율/밀도로 정규화해야 한다.",
+    a_en: "Showing absolute counts ignoring population — normalize to rates/density."
+  }, {
+    q_ko: "정적 지도와 인터랙티브 지도 도구는?",
+    q_en: "Tools for static vs interactive maps?",
+    a_ko: "tmap/ggplot2(정적), leaflet(인터랙티브).",
+    a_en: "tmap/ggplot2 (static), leaflet (interactive)."
+  }, {
+    q_ko: "'PHC가 군집을 이루는가'에 답하는 지표 예시는?",
+    q_en: "A metric to answer 'are PHCs clustered?'",
+    a_ko: "반경 N km 내 다른 PHC 수, 또는 최근접 이웃 거리.",
+    a_en: "Count of other PHCs within N km, or nearest-neighbor distance."
+  }]
+}, {
+  id: "g3",
+  phase: "p4",
+  week: 26,
+  day: 38,
+  titleKo: "시계열 분석",
+  titleEn: "Time Series Analysis",
+  learnKo: "추세·계절성·자기상관과 예측 기초. 경제·거시 데이터의 본질이며 거시·금융 직무에서 자주 요구된다.",
+  learnEn: "Trend, seasonality, autocorrelation, and forecasting basics — the essence of economic data, often required in macro/finance roles.",
+  concepts: [{
+    term_ko: "추세 · 계절성",
+    term_en: "Trend & Seasonality",
+    body_ko: "추세는 장기적인 상승·하락 방향이고, 계절성은 일정 주기로 반복되는 패턴(예: 분기·월별)이다. 시계열을 이해·예측하려면 이 둘을 먼저 분리한다.",
+    body_en: "Trend is the long-run direction; seasonality is a regular repeating pattern (quarterly, monthly). Decomposing both is the first step to understanding and forecasting."
+  }, {
+    term_ko: "자기상관",
+    term_en: "Autocorrelation",
+    body_ko: "한 시점의 값이 과거 시점의 값과 상관되는 정도다. 시계열의 핵심 특징으로, 오늘 값이 어제 값에 의존하므로 일반 회귀 가정이 깨진다.",
+    body_en: "How a value correlates with its own past values. A defining feature of time series — today depends on yesterday, breaking standard regression assumptions."
+  }, {
+    term_ko: "정상성",
+    term_en: "Stationarity",
+    body_ko: "평균·분산·자기상관 구조가 시간에 따라 변하지 않는 성질이다. 많은 예측 모형의 전제 조건이라, 비정상 시계열은 차분 등으로 정상화한다.",
+    body_en: "The property that mean, variance, and autocorrelation don't change over time. A prerequisite for many models; non-stationary series are made stationary via differencing."
+  }, {
+    term_ko: "ARIMA",
+    term_en: "ARIMA",
+    body_ko: "자기회귀(AR), 차분(I), 이동평균(MA)을 결합한 고전적 시계열 예측 모형이다. 단변량 예측의 표준 출발점이며 fable 패키지로 쉽게 적합한다.",
+    body_en: "A classic forecasting model combining autoregression (AR), differencing (I), and moving average (MA). The standard starting point for univariate forecasting, easily fit with fable."
+  }],
+  tasks: [{
+    label: "Forecasting: Principles and Practice (무료 책·free)",
+    url: "https://otexts.com/fpp3/"
+  }, {
+    label: "fable 패키지",
+    url: "https://fable.tidyverts.org/"
+  }, {
+    label: "Example repo: time series forecast",
+    url: "https://github.com/search?q=time+series+forecast+example+repository&type=repositories"
+  }],
+  outputKo: "FRED 거시지표로 시계열 예측 1개",
+  outputEn: "One time-series forecast on a FRED macro indicator",
+  quiz: [{
+    q_ko: "정상성(stationarity)이란?",
+    q_en: "What is stationarity?",
+    a_ko: "평균·분산·자기상관이 시간에 따라 변하지 않는 성질. 많은 모형의 전제.",
+    a_en: "Mean, variance, and autocorrelation don't change over time — a prerequisite for many models."
+  }, {
+    q_ko: "자기상관(autocorrelation)이란?",
+    q_en: "What is autocorrelation?",
+    a_ko: "한 시점 값이 과거 시점 값과 상관되는 정도.",
+    a_en: "How a value correlates with its own past values."
+  }, {
+    q_ko: "시계열에서 무작위 train/test 분할이 부적절한 이유는?",
+    q_en: "Why is random train/test split wrong for time series?",
+    a_ko: "시간 순서가 중요 — 미래 정보가 새면 안 된다. 시간 순서 유지 분할을 쓴다.",
+    a_en: "Time order matters — no leaking future info. Use time-ordered (rolling/expanding) splits."
+  }]
+}, {
+  id: "g4",
+  phase: "p4",
+  week: 27,
+  day: 39,
+  titleKo: "대시보드 (Shiny / Tableau)",
+  titleEn: "Dashboards (Shiny / Tableau)",
+  learnKo: "분석 결과를 인터랙티브 대시보드로 보여준다. 공고에서 자주 요구되지만, 이 커리큘럼에서는 '주력 기술'보다 '전달 방식'으로 둔다. ★ 대시보드 repo/배포.",
+  learnEn: "Turn analysis into interactive dashboards. Often requested in postings, but here it is a delivery layer rather than a core technical identity. ★ Build and deploy the dashboard.",
+  concepts: [{
+    term_ko: "대시보드",
+    term_en: "Dashboard",
+    body_ko: "여러 지표와 그래프를 한 화면에 모아 사용자가 직접 필터·탐색하게 하는 인터랙티브 도구다. 정적 리포트보다 이해관계자의 활용도를 크게 높인다.",
+    body_en: "An interactive screen gathering metrics and charts so users filter and explore themselves. It raises stakeholder usage far above a static report."
+  }, {
+    term_ko: "Shiny",
+    term_en: "Shiny",
+    body_ko: "R로 웹 애플리케이션을 만드는 프레임워크다. 분석 코드를 그대로 살려 인터랙티브 앱으로 바꿀 수 있어 R 분석가에게 강력하다.",
+    body_en: "An R framework for building web apps. It turns your analysis code directly into an interactive app — powerful for R analysts."
+  }, {
+    term_ko: "반응성",
+    term_en: "Reactivity",
+    body_ko: "사용자 입력(슬라이더·선택)이 바뀌면 관련 출력이 자동으로 재계산·갱신되는 Shiny의 핵심 개념이다. 입력→출력의 의존 관계를 자동으로 추적한다.",
+    body_en: "Shiny's core idea: when an input (slider, dropdown) changes, dependent outputs auto-recompute. It tracks input→output dependencies automatically."
+  }, {
+    term_ko: "Tableau Public",
+    term_en: "Tableau Public",
+    body_ko: "코드 없이 드래그앤드롭으로 대시보드를 만드는 무료 BI 도구다. 기업·정부에서 사실상 표준이라, 배워두면 공고 요건을 직접 충족한다.",
+    body_en: "A free, no-code drag-and-drop BI tool. A de facto standard in industry and government — learning it directly meets posting requirements."
+  }],
+  tasks: [{
+    label: "Mastering Shiny (무료 책·free)",
+    url: "https://mastering-shiny.org/"
+  }, {
+    label: "Tableau Public (무료·free)",
+    url: "https://public.tableau.com/app/discover"
+  }, {
+    label: "Example repo: dashboard app",
+    url: "https://github.com/search?q=dashboard+app+example+repository&type=repositories"
+  }],
+  outputKo: "★ 인터랙티브 대시보드 1개 (Shiny 또는 Tableau Public)",
+  outputEn: "★ One interactive dashboard (Shiny or Tableau Public)",
+  quiz: [{
+    q_ko: "Shiny의 reactivity(반응성)란?",
+    q_en: "What is Shiny reactivity?",
+    a_ko: "입력이 바뀌면 관련 출력이 자동 재계산·갱신되는 구조.",
+    a_en: "When inputs change, dependent outputs auto-recompute."
+  }, {
+    q_ko: "왜 정적 리포트 외에 대시보드도 필요한가?",
+    q_en: "Why dashboards on top of static reports?",
+    a_ko: "이해관계자가 직접 필터·탐색 → 활용도↑. 공고가 BI 도구를 자주 요구.",
+    a_en: "Stakeholders filter/explore themselves → higher use. Postings often require BI tools."
+  }, {
+    q_ko: "Tableau와 Shiny 중 선택 기준은?",
+    q_en: "Choosing between Tableau and Shiny?",
+    a_ko: "Tableau=노코드·기업표준·빠름, Shiny=코드 유연성·R 분석과 통합.",
+    a_en: "Tableau = no-code, industry standard, fast; Shiny = code flexibility, integrates with R analysis."
+  }]
+},
+// ═══════ PHASE 5 ═══════
+{
+  id: "h1",
+  phase: "p5",
+  week: 28,
+  day: 40,
+  titleKo: "캡스톤 통합 + 클라우드 배포 1회",
+  titleEn: "Capstone Integration + One Cloud Deploy",
+  learnKo: "인과+예측+공간/시계열을 융합한 플래그십 프로젝트를 완성하고, 클라우드에 한 번 배포해 '돌아가는 산출물'로 만든다.",
+  learnEn: "Complete a flagship project fusing causal + predictive + spatial/time-series work, and deploy it once to the cloud as a 'living artifact.'",
+  concepts: [{
+    term_ko: "캡스톤",
+    term_en: "Capstone",
+    body_ko: "지금까지 배운 모든 것을 하나로 묶는 대표 프로젝트다. 정책 질문 → 데이터 수집 → 인과 추정 + 예측 → 시각화 → 함의까지 전 과정을 보여줘 너의 차별점을 증명한다.",
+    body_en: "A flagship project tying everything together — policy question → data → causal estimate + prediction → visualization → implications — proving your differentiator."
+  }, {
+    term_ko: "경영진 요약",
+    term_en: "Executive summary",
+    body_ko: "리포트 맨 앞에 결론을 먼저 제시하는 부분이다. 채용담당·관리자는 결론부터 보므로, 질문→핵심발견→함의를 먼저 쓰고 방법론은 뒤에 둔다(역피라미드).",
+    body_en: "The up-front section stating conclusions first. Recruiters and managers read top-down — put question→findings→implications first, methodology later (inverted pyramid)."
+  }, {
+    term_ko: "클라우드 배포",
+    term_en: "Cloud deployment",
+    body_ko: "대시보드나 리포트를 shinyapps.io·Quarto Pub 같은 무료 호스팅에 올려 링크로 공유하는 것이다. '분석을 돌아가는 산출물로 전달할 수 있다'는 강력한 신호다.",
+    body_en: "Publishing a dashboard/report to free hosting (shinyapps.io, Quarto Pub) and sharing a link. A strong signal that you can deliver analysis as a working product."
+  }, {
+    term_ko: "재현가능 패키징",
+    term_en: "Reproducible packaging",
+    body_ko: "README, 폴더 구조, 의존성 파일을 갖춰 누구나 코드를 받아 그대로 돌릴 수 있게 만드는 것이다. 연구·분석 직무에서 신뢰의 기본이다.",
+    body_en: "Adding a README, folder structure, and dependency files so anyone can clone and run the code. A baseline of trust in research/analytics roles."
+  }],
+  tasks: [{
+    label: "World Bank Open Data",
+    url: "https://data.worldbank.org/"
+  }, {
+    label: "shinyapps.io 배포 (무료 티어·free)",
+    url: "https://docs.posit.co/shinyapps.io/"
+  }, {
+    label: "Quarto Pub 배포",
+    url: "https://quarto.org/docs/publishing/quarto-pub.html"
+  }, {
+    label: "Example repo: public portfolio site",
+    url: "https://github.com/search?q=quarto+portfolio+example+repository&type=repositories"
+  }],
+  outputKo: "캡스톤 완성 + 대시보드/리포트를 클라우드에 라이브 배포",
+  outputEn: "Complete capstone + deploy dashboard/report live to cloud",
+  quiz: [{
+    q_ko: "캡스톤에서 너의 차별점을 어떻게 드러내나?",
+    q_en: "How does the capstone show your differentiator?",
+    a_ko: "인과 식별(정책효과) + 예측(ML) + 공간/시계열 + 정책 도메인을 한 프로젝트에 결합.",
+    a_en: "By combining causal identification + ML prediction + spatial/time-series + policy domain in one project."
+  }, {
+    q_ko: "클라우드 배포 경험이 면접에서 주는 신호는?",
+    q_en: "What signal does a cloud deploy send?",
+    a_ko: "분석을 '돌아가는 산출물'로 전달할 수 있다 — 엔지니어링 위생의 증거.",
+    a_en: "That you can deliver analysis as a working product — evidence of engineering hygiene."
+  }, {
+    q_ko: "경영진 요약을 앞세우는 이유는?",
+    q_en: "Why lead with an executive summary?",
+    a_ko: "독자는 결론부터 본다. 질문→발견→함의 먼저, 방법은 뒤(역피라미드).",
+    a_en: "Readers start with conclusions. Question→findings→implications first, methods later (inverted pyramid)."
+  }]
+}, {
+  id: "h2",
+  phase: "p5",
+  week: 29,
+  day: 41,
+  titleKo: "포트폴리오 마감 + 면접/지원",
+  titleEn: "Portfolio Finalization + Interview/Apply",
+  learnKo: "포트폴리오 사이트를 다듬고, SQL/통계/ML 면접을 마무리하고 지원을 시작한다. 전체 여정의 결승선.",
+  learnEn: "Polish the portfolio site, finish SQL/stats/ML interview prep, and start applying — the finish line of the journey.",
+  concepts: [{
+    term_ko: "포트폴리오 사이트",
+    term_en: "Portfolio site",
+    body_ko: "About + 프로젝트 2~3개 + 이력서를 모은 공개 Quarto 사이트다. 채용담당이 가장 먼저 보는 것은 코드가 아니라 스토리와 결과 시각화이므로 README와 요약이 명료해야 한다.",
+    body_en: "A public Quarto site with an About page, 2–3 projects, and a resume. Recruiters look first at story and result visuals, not code — so the README and summaries must be crisp."
+  }, {
+    term_ko: "STAR 기법",
+    term_en: "STAR method",
+    body_ko: "행동 면접 답변을 Situation(상황)-Task(과제)-Action(행동)-Result(결과) 구조로 구성하는 방법이다. 포트폴리오 프로젝트를 이 틀에 맞춰 이야기하면 설득력이 높다.",
+    body_en: "Structuring behavioral-interview answers as Situation-Task-Action-Result. Framing portfolio projects this way makes them persuasive."
+  }, {
+    term_ko: "A/B 테스트",
+    term_en: "A/B test",
+    body_ko: "사용자를 무작위로 두 버전(A/B)에 배정해 효과를 비교하는 실험이다. 무작위 배정 덕분에 차이를 인과효과로 해석할 수 있어, 제품·정책 분석 면접 단골이다.",
+    body_en: "An experiment randomly assigning users to versions A/B to compare effects. Randomization lets you read the difference as causal — a staple of product/policy interviews."
+  }, {
+    term_ko: "포지셔닝",
+    term_en: "Positioning",
+    body_ko: "'나는 누구이고 무엇을 잘하는가'를 한 문장으로 압축한 자기소개 메시지다. 너의 경우 '예측과 인과 식별을 구분하고 둘 다 구현하며 정책 도메인을 안다'가 핵심이다.",
+    body_en: "A one-sentence self-introduction of who you are and what you do best. For you: 'I distinguish prediction from causal identification, implement both, and know the policy domain.'"
+  }],
+  tasks: [{
+    label: "DataLemur (SQL/통계/ML 문제)",
+    url: "https://datalemur.com/",
+    type: "practice"
+  }, {
+    label: "LeetCode Top SQL 50 (타임드·timed)",
+    url: "https://leetcode.com/studyplan/top-sql-50/",
+    type: "practice"
+  }, {
+    label: "awesome-quarto (사이트 예시·examples)",
+    url: "https://github.com/mcanouil/awesome-quarto",
+    type: "example"
+  }, {
+    label: "Example repo: portfolio website",
+    url: "https://github.com/search?q=portfolio+website+example+repository&type=repositories",
+    type: "example"
+  }],
+  outputKo: "★ 라이브 포트폴리오 + 이력서 링크 + STAR 스토리 2–3개 + 지원 시작",
+  outputEn: "★ Live portfolio + resume links + 2–3 STAR stories + start applying",
+  quiz: [{
+    q_ko: "A/B 테스트가 인과효과를 주는 이유는?",
+    q_en: "Why does an A/B test yield a causal effect?",
+    a_ko: "무작위 배정으로 두 군이 평균 동일 → 차이를 처치효과로 해석.",
+    a_en: "Random assignment makes groups equal on average → the difference is the treatment effect."
+  }, {
+    q_ko: "STAR의 네 요소는?",
+    q_en: "The four parts of STAR?",
+    a_ko: "Situation-Task-Action-Result.",
+    a_en: "Situation-Task-Action-Result."
+  }, {
+    q_ko: "포트폴리오에서 채용담당이 먼저 보는 것은?",
+    q_en: "What do recruiters look at first in a portfolio?",
+    a_ko: "스토리·결과 시각화. 코드는 그 다음. README 명료성이 핵심.",
+    a_en: "Story and result visuals; code comes later. README clarity is key."
+  }]
+}];
+function StudyTracker() {
+  const [done, setDone] = useState({});
+  const [openQuiz, setOpenQuiz] = useState({});
+  const [showAns, setShowAns] = useState({});
+  const [activePhase, setActivePhase] = useState("p0");
+  const [lang, setLang] = useState("both");
+  const [loaded, setLoaded] = useState(false);
+  const STORAGE_KEY = "study_tracker_v8";
+  useEffect(() => {
+    try {
+      const r = window.localStorage.getItem(STORAGE_KEY);
+      if (r) setDone(JSON.parse(r));
+    } catch (e) {}
+    setLoaded(true);
+  }, []);
+  useEffect(() => {
+    if (!loaded) return;
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(done));
+    } catch (e) {}
+  }, [done, loaded, STORAGE_KEY]);
+  const toggle = id => setDone(d => ({
+    ...d,
+    [id]: !d[id]
+  }));
+  const toggleQuiz = id => setOpenQuiz(q => ({
+    ...q,
+    [id]: !q[id]
+  }));
+  const toggleAns = k => setShowAns(a => ({
+    ...a,
+    [k]: !a[k]
+  }));
+  const totalDone = Object.values(done).filter(Boolean).length;
+  const totalDays = DAYS.length;
+  const pct = Math.round(totalDone / Math.max(totalDays, 1) * 100);
+  const phaseDays = pid => DAYS.filter(d => d.phase === pid);
+  const phaseDone = pid => phaseDays(pid).filter(d => done[d.id]).length;
+  const ap = PHASES.find(p => p.id === activePhase);
+  const C = ap.color,
+    BG = ap.bg;
+  const weeks = [];
+  phaseDays(activePhase).forEach(d => {
+    let w = weeks.find(x => x.week === d.week);
+    if (!w) {
+      w = {
+        week: d.week,
+        days: []
+      };
+      weeks.push(w);
+    }
+    w.days.push(d);
+  });
+  const showKo = lang === "ko" || lang === "both";
+  const showEn = lang === "en" || lang === "both";
+  const classifyTask = (task = {}) => {
+    if (task.type) return task.type;
+    const label = task.label || "";
+    const s = label.toLowerCase();
+    if (s.includes("video") || s.includes("영상") || s.includes("lecture") || s.includes("lesson") || s.includes("intro") || s.includes("course")) return "watch";
+    if (s.includes("official") || s.includes("docs") || s.includes("guide") || s.includes("getting started") || s.includes("tutorial") || s.includes("handbook") || s.includes("book") || s.includes("r4ds") || s.includes("the effect") || s.includes("week")) return "read";
+    if (s.includes("example repo") || s.includes("example") || s.includes("repo") || s.includes("github") || s.includes("portfolio") || s.includes("project")) return "example";
+    if (s.includes("practice") || s.includes("quiz") || s.includes("exercise") || s.includes("problem") || s.includes("learn") || s.includes("challenge") || s.includes("exercise")) return "practice";
+    return "other";
+  };
+  const groupTasks = (tasks = []) => tasks.reduce((acc, t) => {
+    const key = classifyTask(t);
+    acc[key].push(t);
+    return acc;
+  }, {
+    watch: [],
+    read: [],
+    example: [],
+    practice: [],
+    other: []
+  });
+  const FONT = "'Inter','Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
+  const INK = "#1a1a1a",
+    INK2 = "#333333",
+    INK3 = "#52525b";
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: "100vh",
+      background: "#f5f3ee",
+      fontFamily: FONT,
+      color: INK,
+      paddingBottom: 60,
+      fontSize: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#15171c",
+      color: "#fff",
+      padding: "30px 24px 26px",
+      borderBottom: "4px solid " + C
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 700,
+      letterSpacing: "0.2em",
+      color: "#a7b0c0",
+      textTransform: "uppercase",
+      marginBottom: 10
+    }
+  }, "Bilingual Lecture Tracker · v7 · 한국어 / English"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 26,
+      fontWeight: 800,
+      lineHeight: 1.2,
+      letterSpacing: "-0.01em"
+    }
+  }, "Applied Microeconomics · Econometrics · Applied Data Science"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 15,
+      color: "#d4d8e0",
+      marginTop: 9,
+      fontWeight: 500
+    }
+  }, "“MIDP concentrated in applied microeconomics, econometrics, and applied data science”"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      color: "#aeb4c0",
+      marginTop: 6,
+      fontWeight: 600
+    }
+  }, "Target roles: policy · research assistant/associate · data analyst/scientist (non-CS)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 7,
+      marginTop: 18
+    }
+  }, [["both", "한 + EN"], ["ko", "한국어"], ["en", "English"]].map(([v, label]) => /*#__PURE__*/React.createElement("button", {
+    key: v,
+    onClick: () => setLang(v),
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      padding: "6px 14px",
+      borderRadius: 8,
+      cursor: "pointer",
+      border: "2px solid " + (lang === v ? C : "#3a3f4b"),
+      background: lang === v ? C : "transparent",
+      color: lang === v ? "#fff" : "#c0c5d0"
+    }
+  }, label))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 18
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 13,
+      fontWeight: 700,
+      marginBottom: 7,
+      color: "#d4d8e0"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, showKo ? "전체 진행" : "", showKo && showEn ? " · " : "", showEn ? "Progress" : ""), /*#__PURE__*/React.createElement("span", null, totalDone, " / ", totalDays, " · ", pct, "%")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 10,
+      background: "#2a2e38",
+      borderRadius: 99,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: "100%",
+      width: pct + "%",
+      background: C,
+      borderRadius: 99,
+      transition: "width .4s"
+    }
+  })))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      padding: "0 10px",
+      background: "#15171c",
+      overflowX: "auto"
+    }
+  }, PHASES.map(p => {
+    const active = p.id === activePhase;
+    return /*#__PURE__*/React.createElement("button", {
+      key: p.id,
+      onClick: () => setActivePhase(p.id),
+      style: {
+        flex: "1 0 auto",
+        minWidth: 124,
+        border: "none",
+        cursor: "pointer",
+        background: active ? p.bg : "transparent",
+        color: active ? p.color : "#aeb4c0",
+        padding: "12px 13px 14px",
+        textAlign: "left",
+        borderTop: active ? "4px solid " + p.color : "4px solid transparent",
+        fontFamily: FONT
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: "0.05em",
+        opacity: 0.9
+      }
+    }, p.name, " · ", p.weeks), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13.5,
+        fontWeight: 800,
+        marginTop: 3,
+        lineHeight: 1.25
+      }
+    }, p.title), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        fontWeight: 700,
+        marginTop: 5,
+        opacity: 0.85
+      }
+    }, phaseDone(p.id), "/", phaseDays(p.id).length));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 820,
+      margin: "0 auto",
+      padding: "22px 20px 0"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BG,
+      border: "2px solid " + C + "44",
+      borderLeft: "5px solid " + C,
+      borderRadius: 12,
+      padding: "15px 17px"
+    }
+  }, showKo && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14.5,
+      lineHeight: 1.65,
+      color: INK
+    }
+  }, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: C,
+      fontWeight: 800
+    }
+  }, "목표."), " ", ap.goalKo), showEn && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13.5,
+      lineHeight: 1.6,
+      color: INK2,
+      marginTop: showKo ? 7 : 0
+    }
+  }, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: C,
+      fontWeight: 800
+    }
+  }, "Goal."), " ", ap.goalEn), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      lineHeight: 1.5,
+      color: INK3,
+      marginTop: 9,
+      fontWeight: 600
+    }
+  }, "▸ ", ap.deliverable)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12,
+      background: "#fff",
+      border: "1.5px solid " + C + "33",
+      borderRadius: 12,
+      padding: "14px 16px",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      fontWeight: 800,
+      color: C,
+      letterSpacing: "0.12em",
+      marginBottom: 10,
+      textTransform: "uppercase"
+    }
+  }, "COURSE FLOW · 오늘 수업 듣는 법"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: showKo && showEn ? "repeat(2,minmax(0,1fr))" : "1fr",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#f8f5ef",
+      borderRadius: 10,
+      padding: "11px 12px",
+      border: "1px solid " + C + "22"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      fontWeight: 800,
+      color: INK
+    }
+  }, "1) Lecture links · 강의 링크"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.8,
+      color: INK2,
+      lineHeight: 1.6,
+      marginTop: 5
+    }
+  }, showKo && "오늘 수업의 링크를 위에서 아래 순서로 클릭해서 듣는다.", showKo && showEn && /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#b8a99b"
+    }
+  }, " · "), showEn && "Open the links top-to-bottom to follow today’s lesson order.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#f8f5ef",
+      borderRadius: 10,
+      padding: "11px 12px",
+      border: "1px solid " + C + "22"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      fontWeight: 800,
+      color: INK
+    }
+  }, "2) Notes · 필기"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.8,
+      color: INK2,
+      lineHeight: 1.6,
+      marginTop: 5
+    }
+  }, showKo && "핵심 개념 박스는 수업 노트다. 읽고, 필요한 경우 캡처해서 따로 정리한다.", showKo && showEn && /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#b8a99b"
+    }
+  }, " · "), showEn && "The concept boxes are your lecture notes. Read them and capture the parts you need.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#f8f5ef",
+      borderRadius: 10,
+      padding: "11px 12px",
+      border: "1px solid " + C + "22"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      fontWeight: 800,
+      color: INK
+    }
+  }, "3) Assignment · 실습 과제"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.8,
+      color: INK2,
+      lineHeight: 1.6,
+      marginTop: 5
+    }
+  }, showKo && "과제는 '오늘 배운 걸 손으로 직접 해보는 부분'이다.", showKo && showEn && /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#b8a99b"
+    }
+  }, " · "), showEn && "The assignment is where you do the work yourself and prove you understood it.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#f8f5ef",
+      borderRadius: 10,
+      padding: "11px 12px",
+      border: "1px solid " + C + "22"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      fontWeight: 800,
+      color: INK
+    }
+  }, "4) Review · 복습"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.8,
+      color: INK2,
+      lineHeight: 1.6,
+      marginTop: 5
+    }
+  }, showKo && "퀴즈를 닫았다가 다시 열어 정답까지 확인하면 그날 수업이 끝난다.", showKo && showEn && /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#b8a99b"
+    }
+  }, " · "), showEn && "Close the quiz, reopen it, and check the answer to finish the lesson."))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 820,
+      margin: "0 auto",
+      padding: "12px 20px 0"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#fff",
+      border: "1.5px solid #ddd6c8",
+      borderRadius: 12,
+      padding: "14px 16px",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      fontWeight: 800,
+      color: C,
+      letterSpacing: "0.12em",
+      marginBottom: 10,
+      textTransform: "uppercase"
+    }
+  }, "CLASS MAP · course navigation"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 8,
+      marginBottom: 12
+    }
+  }, PHASES.map(p => /*#__PURE__*/React.createElement("button", {
+    key: p.id,
+    onClick: () => setActivePhase(p.id),
+    style: {
+      border: "1.5px solid " + (activePhase === p.id ? p.color : "#d7d0c4"),
+      background: activePhase === p.id ? p.bg : "#faf8f4",
+      color: activePhase === p.id ? p.color : INK2,
+      borderRadius: 999,
+      padding: "7px 12px",
+      cursor: "pointer",
+      fontSize: 12.5,
+      fontWeight: 800,
+      fontFamily: FONT
+    }
+  }, p.name, " · ", p.title))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: showKo && showEn ? "repeat(2,minmax(0,1fr))" : "1fr",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#f8f5ef",
+      borderRadius: 10,
+      padding: "11px 12px",
+      border: "1px solid " + C + "22"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      fontWeight: 800,
+      color: INK
+    }
+  }, "How to use · 사용 순서"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.8,
+      color: INK2,
+      lineHeight: 1.6,
+      marginTop: 5
+    }
+  }, showKo && "위의 Phase 탭으로 단원을 고른 뒤, 각 day의 Watch / Read / Example repo 링크를 순서대로 클릭한다.", showKo && showEn && /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#b8a99b"
+    }
+  }, " · "), showEn && "Choose a phase above, then open each day’s Watch / Read / Example repo links in order.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#f8f5ef",
+      borderRadius: 10,
+      padding: "11px 12px",
+      border: "1px solid " + C + "22"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      fontWeight: 800,
+      color: INK
+    }
+  }, "Comparison · 비교 방법"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.8,
+      color: INK2,
+      lineHeight: 1.6,
+      marginTop: 5
+    }
+  }, showKo && "원본 버전과 강의형 버전을 각각 다른 폴더로 실행하면 동시에 열어 비교할 수 있다.", showKo && showEn && /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#b8a99b"
+    }
+  }, " · "), showEn && "Run the original and lecture versions in separate folders to compare them side by side."))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 820,
+      margin: "0 auto",
+      padding: "8px 20px"
+    }
+  }, weeks.map(w => /*#__PURE__*/React.createElement("div", {
+    key: w.week,
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 800,
+      letterSpacing: "0.12em",
+      textTransform: "uppercase",
+      color: "#8a8f9a",
+      marginBottom: 11,
+      borderBottom: "2px solid #ddd9d0",
+      paddingBottom: 7
+    }
+  }, "Week ", w.week), w.days.map(d => {
+    const isDone = !!done[d.id];
+    const qOpen = !!openQuiz[d.id];
+    return /*#__PURE__*/React.createElement("div", {
+      key: d.id,
+      style: {
+        background: "#fff",
+        borderRadius: 14,
+        marginBottom: 12,
+        border: "2px solid " + (isDone ? C : "#e5e1d8"),
+        overflow: "hidden",
+        boxShadow: isDone ? "none" : "0 1px 3px rgba(0,0,0,0.05)",
+        opacity: isDone ? 0.9 : 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 13,
+        padding: "16px 17px"
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: () => toggle(d.id),
+      style: {
+        flexShrink: 0,
+        marginTop: 1,
+        width: 26,
+        height: 26,
+        borderRadius: 8,
+        border: "2.5px solid " + (isDone ? C : "#c4c0b6"),
+        background: isDone ? C : "#fff",
+        color: "#fff",
+        cursor: "pointer",
+        fontSize: 15,
+        fontWeight: 800,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: FONT
+      }
+    }, isDone ? "✓" : ""), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "baseline",
+        gap: 9,
+        flexWrap: "wrap"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        fontWeight: 800,
+        color: "#fff",
+        background: C,
+        padding: "3px 10px",
+        borderRadius: 7
+      }
+    }, "Day ", d.day), showKo && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 17,
+        fontWeight: 800,
+        color: INK,
+        textDecoration: isDone ? "line-through" : "none"
+      }
+    }, d.titleKo), showEn && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: showKo ? 13.5 : 17,
+        fontWeight: showKo ? 600 : 800,
+        color: showKo ? INK3 : INK,
+        textDecoration: isDone ? "line-through" : "none"
+      }
+    }, showKo ? "· " + d.titleEn : d.titleEn)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 10
+      }
+    }, showKo && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 14,
+        color: INK2,
+        lineHeight: 1.65,
+        fontWeight: 500
+      }
+    }, d.learnKo), showEn && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13,
+        color: INK3,
+        lineHeight: 1.6,
+        marginTop: showKo ? 4 : 0,
+        fontWeight: 500
+      }
+    }, d.learnEn)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 13,
+        background: "#f7f4ef",
+        border: "1.5px solid " + C + "44",
+        borderRadius: 11,
+        padding: "14px 15px"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        fontWeight: 800,
+        color: C,
+        letterSpacing: "0.1em",
+        marginBottom: 10
+      }
+    }, "LESSON FLOW · 오늘 수업 루틴"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12.5,
+        lineHeight: 1.6,
+        color: INK2,
+        marginBottom: 10,
+        fontWeight: 600
+      }
+    }, showKo && "링크를 위에서 아래로 따라가면 오늘 수업이 끝까지 이어진다.", showKo && showEn && /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "#b8a99b"
+      }
+    }, " · "), showEn && "Follow the links from top to bottom and you’ll complete today’s class."), (() => {
+      const grouped = groupTasks(d.tasks);
+      const sections = [["1. Watch · 듣기", grouped.watch], ["2. Read · 읽기", grouped.read], ["3. Example repo · 예제", grouped.example], ["4. Practice · 실습", grouped.practice], ["5. Other links · 기타", grouped.other]].filter(([, items]) => items.length > 0);
+      return /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          flexDirection: "column",
+          gap: 9
+        }
+      }, sections.map(([title, items]) => /*#__PURE__*/React.createElement("div", {
+        key: title
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 12.5,
+          fontWeight: 800,
+          color: INK,
+          marginBottom: 7
+        }
+      }, title), /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          flexDirection: "column",
+          gap: 7
+        }
+      }, items.map((t, i) => /*#__PURE__*/React.createElement("a", {
+        key: i,
+        href: t.url,
+        target: "_blank",
+        rel: "noopener noreferrer",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          gap: 9,
+          fontSize: 13.2,
+          color: C,
+          textDecoration: "none",
+          padding: "8px 12px",
+          borderRadius: 9,
+          background: "#fff",
+          border: "1.5px solid " + C + "33",
+          fontWeight: 600
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontWeight: 800,
+          fontSize: 13
+        }
+      }, "↗"), /*#__PURE__*/React.createElement("span", {
+        style: {
+          flex: 1
+        }
+      }, t.label)))))));
+    })()), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 13,
+        background: "#fafaf8",
+        border: "1.5px solid " + C + "33",
+        borderRadius: 11,
+        padding: "14px 15px"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        fontWeight: 800,
+        color: C,
+        letterSpacing: "0.1em",
+        marginBottom: 11
+      }
+    }, "KEY CONCEPTS · 핵심 개념"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 13
+      }
+    }, d.concepts.map((c, i) => /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        borderLeft: "3px solid " + C,
+        paddingLeft: 13
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 14.5,
+        fontWeight: 800,
+        color: INK,
+        lineHeight: 1.4
+      }
+    }, showKo && c.term_ko, showKo && showEn && /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "#cbb"
+      }
+    }, " · "), showEn && /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: C
+      }
+    }, c.term_en)), showKo && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13.5,
+        color: INK2,
+        lineHeight: 1.7,
+        marginTop: 4,
+        fontWeight: 500
+      }
+    }, c.body_ko), showEn && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12.5,
+        color: INK3,
+        lineHeight: 1.65,
+        marginTop: showKo ? 5 : 4,
+        fontWeight: 500
+      }
+    }, c.body_en))))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 11,
+        fontSize: 13.5,
+        color: INK2,
+        lineHeight: 1.55,
+        fontWeight: 500
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontWeight: 800,
+        color: C,
+        fontSize: 11.5,
+        letterSpacing: "0.06em"
+      }
+    }, "ASSIGNMENT · 과제 "), showKo && d.outputKo, showKo && showEn && " · ", showEn && /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: INK3
+      }
+    }, d.outputEn)), /*#__PURE__*/React.createElement("button", {
+      onClick: () => toggleQuiz(d.id),
+      style: {
+        marginTop: 12,
+        fontSize: 13,
+        fontWeight: 700,
+        background: qOpen ? C : "#fff",
+        color: qOpen ? "#fff" : C,
+        border: "2px solid " + C,
+        borderRadius: 9,
+        padding: "7px 14px",
+        cursor: "pointer",
+        fontFamily: FONT
+      }
+    }, qOpen ? "▾ 복습문제 · Review " + d.quiz.length : "▸ 복습문제 · Review " + d.quiz.length), qOpen && /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 10,
+        display: "flex",
+        flexDirection: "column",
+        gap: 9
+      }
+    }, d.quiz.map((qz, qi) => {
+      const key = d.id + "_" + qi;
+      const aOpen = !!showAns[key];
+      return /*#__PURE__*/React.createElement("div", {
+        key: qi,
+        style: {
+          background: BG,
+          borderRadius: 11,
+          padding: "13px 15px",
+          border: "1.5px solid " + C + "44"
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 14,
+          fontWeight: 700,
+          color: INK,
+          lineHeight: 1.55
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: C,
+          fontWeight: 800
+        }
+      }, "Q", qi + 1, ". "), showKo && qz.q_ko, showKo && showEn && /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: INK3,
+          fontWeight: 600
+        }
+      }, " · ", qz.q_en), !showKo && qz.q_en), /*#__PURE__*/React.createElement("button", {
+        onClick: () => toggleAns(key),
+        style: {
+          marginTop: 8,
+          cursor: "pointer",
+          fontSize: 12.5,
+          fontWeight: 700,
+          color: C,
+          background: "transparent",
+          border: "none",
+          padding: 0,
+          fontFamily: FONT
+        }
+      }, aOpen ? "▾ 정답 · Answer" : "정답 보기 · Show answer →"), aOpen && /*#__PURE__*/React.createElement("div", {
+        style: {
+          marginTop: 9,
+          paddingTop: 9,
+          borderTop: "1.5px dashed " + C + "66"
+        }
+      }, showKo && /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 13.5,
+          color: INK,
+          lineHeight: 1.7,
+          fontWeight: 500
+        }
+      }, qz.a_ko), showEn && /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 12.5,
+          color: INK3,
+          lineHeight: 1.65,
+          marginTop: showKo ? 5 : 0,
+          fontWeight: 500
+        }
+      }, qz.a_en)));
+    })))));
+  })))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 820,
+      margin: "28px auto 0",
+      padding: "0 20px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#15171c",
+      color: "#fff",
+      borderRadius: 14,
+      padding: "17px 19px",
+      fontSize: 13.5,
+      lineHeight: 1.75,
+      fontWeight: 500
+    }
+  }, showKo && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      fontWeight: 800
+    }
+  }, "v7 — adds RCT & power analysis."), " 각 day는 `강의 링크 → 공식 문서 → 예제 repo → 실습 과제 → 복습 문제` 순서로 설계했어. 언어를 바꾸고, 링크를 눌러 수업을 듣고, 체크박스로 진행도를 쌓으면 돼. 진행 상황은 이 브라우저에 저장돼."), showEn && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: showKo ? 9 : 0,
+      color: "#c8cdd6"
+    }
+  }, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      fontWeight: 800,
+      color: "#fff"
+    }
+  }, "v7 — adds RCT & power analysis."), " Each day is structured as `lecture links → official docs → example repo → assignment → review`. Switch languages, follow the links, and use the checkboxes to track progress. Progress is saved in this browser."))));
+}
+      ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(StudyTracker));
+    } catch(e){
+      document.getElementById("root").innerHTML = "<div style='font-family:sans-serif;padding:40px;color:#b00'>Error: " + e.message + "</div>";
+      console.error(e);
+    }
+  }
+  if(document.readyState !== "loading"){ setTimeout(start,50); }
+  else { window.addEventListener("DOMContentLoaded", start); }
+})();
+</script>
+</body>
+</html>
